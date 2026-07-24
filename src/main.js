@@ -218,10 +218,10 @@ export const App = {
   closeModal,
 
   // Save — محمية من double-submit
-  saveIncome:     withSaveGuard(() => saveIncome(getState().editingId,     () => { closeModal(); renderPage('income');      })),
-  saveExpense:    withSaveGuard(() => saveExpense(getState().editingId,    () => { closeModal(); renderPage('expenses');   })),
-  saveDebt:       withSaveGuard(() => saveDebt(getState().editingId,       () => { closeModal(); renderPage('debts');      })),
-  saveInvestment: withSaveGuard(() => saveInvestment(getState().editingId, () => { closeModal(); renderPage('investments'); })),
+  saveIncome:     withSaveGuard(() => saveIncome(getState().editingId,     () => { closeModal(); renderPage(getState().currentPage); })),
+  saveExpense:    withSaveGuard(() => saveExpense(getState().editingId,    () => { closeModal(); renderPage(getState().currentPage); })),
+  saveDebt:       withSaveGuard(() => saveDebt(getState().editingId,       () => { closeModal(); renderPage(getState().currentPage); })),
+  saveInvestment: withSaveGuard(() => saveInvestment(getState().editingId, () => { closeModal(); renderPage(getState().currentPage); })),
 
   // Delete
   confirmDelete:  (type, id) => openConfirm(type, id),
