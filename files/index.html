@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="تطبيق متكامل لإدارة الميزانية الشخصية والمصروفات والديون والاستثمارات">
+  <meta name="theme-color" content="#4f7cff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ميزانيتي">
+  <link rel="manifest" href="manifest.json">
+  <title>ميزانيتي — مدير الميزانية الشخصية</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     SVG Sprite — Lucide Icons
+     ════════════════════════════════════════ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <!-- wallet -->
+  <symbol id="ic-wallet" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></symbol>
+  <!-- trending-down -->
+  <symbol id="ic-trending-down" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
+  <!-- trending-up -->
+  <symbol id="ic-trending-up" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+  <!-- landmark (bank) -->
+  <symbol id="ic-landmark" viewBox="0 0 24 24"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></symbol>
+  <!-- bar-chart-2 -->
+  <symbol id="ic-bar-chart" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></symbol>
+  <!-- piggy-bank -->
+  <symbol id="ic-piggy" viewBox="0 0 24 24"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/><path d="M2 9v1a2 2 0 0 0 2 2h1"/><path d="M16 11h.01"/></symbol>
+  <!-- target -->
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <!-- home -->
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <!-- credit-card -->
+  <symbol id="ic-credit-card" viewBox="0 0 24 24"><rect width="22" height="16" x="1" y="4" rx="2" ry="2"/><line x1="1" x2="23" y1="10" y2="10"/></symbol>
+  <!-- dollar-sign -->
+  <symbol id="ic-dollar" viewBox="0 0 24 24"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+  <!-- list -->
+  <symbol id="ic-list" viewBox="0 0 24 24"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></symbol>
+  <!-- search -->
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></symbol>
+  <!-- sun -->
+  <symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <!-- moon -->
+  <symbol id="ic-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+  <!-- download -->
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+  <!-- upload -->
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></symbol>
+  <!-- smartphone -->
+  <symbol id="ic-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></symbol>
+  <!-- printer -->
+  <symbol id="ic-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></symbol>
+  <!-- edit-2 -->
+  <symbol id="ic-edit" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+  <!-- trash-2 -->
+  <symbol id="ic-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
+  <!-- plus -->
+  <symbol id="ic-plus" viewBox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></symbol>
+  <!-- x (close) -->
+  <symbol id="ic-x" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></symbol>
+  <!-- pie-chart -->
+  <symbol id="ic-pie" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></symbol>
+  <!-- activity (line chart) -->
+  <symbol id="ic-activity" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+  <!-- calendar -->
+  <symbol id="ic-calendar" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></symbol>
+  <!-- briefcase -->
+  <symbol id="ic-briefcase" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <!-- cpu (freelance) -->
+  <symbol id="ic-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M9 2v2M15 20v2M9 20v2M2 15h2M2 9h2M20 15h2M20 9h2"/></symbol>
+  <!-- layers (projects) -->
+  <symbol id="ic-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <!-- utensils (food) -->
+  <symbol id="ic-food" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
+  <!-- car (transport) -->
+  <symbol id="ic-car" viewBox="0 0 24 24"><path d="M19 17H5v-5l2-6h10l2 6v5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></symbol>
+  <!-- book-open (education) -->
+  <symbol id="ic-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+  <!-- wifi (internet) -->
+  <symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></symbol>
+  <!-- heart-pulse (health) -->
+  <symbol id="ic-health" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+  <!-- gamepad-2 (entertainment) -->
+  <symbol id="ic-game" viewBox="0 0 24 24"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></symbol>
+  <!-- shopping-bag -->
+  <symbol id="ic-shopping" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <!-- file-text (bills) -->
+  <symbol id="ic-bills" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+  <!-- circle-dot (other) -->
+  <symbol id="ic-other" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></symbol>
+  <!-- line-chart -->
+  <symbol id="ic-linechart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></symbol>
+  <!-- gauge (analytics) -->
+  <symbol id="ic-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+  <!-- building-2 (real estate) -->
+  <symbol id="ic-building" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h4"/><path d="M18 9h2a2 2 0 0 1 2 2v11h-4"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></symbol>
+  <!-- coins -->
+  <symbol id="ic-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
+  <!-- save -->
+  <symbol id="ic-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol>
+  <!-- chevron-left -->
+  <symbol id="ic-chevron-left" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+  <!-- settings -->
+  <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <!-- alert-triangle -->
+  <symbol id="ic-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></symbol>
+</svg>
+
+<!-- ════════════════════════════════════════
+     شاشة الترحيب
+════════════════════════════════════════ -->
+<div id="welcomeScreen" class="welcome-screen show">
+  <div class="welcome-logo">
+    <svg class="icon icon-xl" viewBox="0 0 24 24"><use href="#ic-wallet"/></svg>
+  </div>
+  <div class="welcome-title">ميزانيتي</div>
+  <div class="welcome-subtitle">مدير الميزانية الشخصية</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     الشريط العلوي
+════════════════════════════════════════ -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <div class="nav-logo">
+      <svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-wallet"/></svg>
+    </div>
+    <div class="nav-title">ميزانيتي<span>.</span></div>
+  </div>
+
+  <div class="time-filter" style="margin:0;flex:1;justify-content:center;max-width:220px">
+    <select id="filterMonth" class="form-control" style="padding:5px 8px;font-size:12px;height:32px"></select>
+    <select id="filterYear"  class="form-control" style="padding:5px 8px;font-size:12px;height:32px;width:78px"></select>
+  </div>
+
+  <div class="nav-actions">
+    <button id="installBtn" class="nav-btn" style="display:none" title="تثبيت التطبيق">
+      <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-smartphone"/></svg>
+    </button>
+    <!-- hidden — controlled from More page -->
+    <button id="themeBtn" class="nav-btn" style="display:none">
+      <svg class="icon icon-sm" id="themeIcon" viewBox="0 0 24 24"><use href="#ic-sun"/></svg>
+    </button>
+    <button id="exportBtn" style="display:none"></button>
+    <button id="importBtn" style="display:none"></button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════
+     المحتوى الرئيسي
+════════════════════════════════════════ -->
+<main class="main-content">
+
+  <!-- ══════════════════════════════
+       لوحة التحكم
+  ══════════════════════════════ -->
+  <section id="page-dashboard" class="page">
+
+    <!-- Net Worth Hero -->
+    <div class="hero-greeting fade-in">
+      <div class="hero-date" id="dash-date"></div>
+      <div class="hero-title" id="dash-greeting">مرحباً</div>
+      <div class="hero-balance" id="dash-net-balance">0 ج.م</div>
+      <div class="hero-balance-label">صافي الرصيد الشهري</div>
+      <!-- Net Worth Mini Row -->
+      <div class="net-worth-row">
+        <div class="net-worth-item">
+          <div class="nw-label">الأصول</div>
+          <div class="nw-value positive" id="dash-assets">0 ج.م</div>
+        </div>
+        <div class="net-worth-divider"></div>
+        <div class="net-worth-item">
+          <div class="nw-label">الالتزامات</div>
+          <div class="nw-value negative" id="dash-liabilities">0 ج.م</div>
+        </div>
+        <div class="net-worth-divider"></div>
+        <div class="net-worth-item">
+          <div class="nw-label">الادخار</div>
+          <div class="nw-value brand" id="dash-saving-rate">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cash Flow -->
+    <div class="cash-flow-card fade-in stagger-1">
+      <div class="cf-label">التدفق النقدي هذا الشهر</div>
+      <div class="cf-row">
+        <div class="cf-item cf-income">
+          <div class="cf-icon">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
+          </div>
+          <div>
+            <div class="cf-title">دخل</div>
+            <div class="cf-amount" id="dash-income">0 ج.م</div>
+          </div>
+        </div>
+        <div class="cf-arrow">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-trending-down"/></svg>
+        </div>
+        <div class="cf-item cf-expense">
+          <div class="cf-icon">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-credit-card"/></svg>
+          </div>
+          <div>
+            <div class="cf-title">مصروفات</div>
+            <div class="cf-amount" id="dash-expenses">0 ج.م</div>
+          </div>
+        </div>
+      </div>
+      <!-- Progress bar الإنفاق مقارنة بالدخل -->
+      <div class="cf-progress-wrap">
+        <div class="cf-progress-bar" id="dash-spend-bar"></div>
+      </div>
+      <div class="cf-footer">
+        <span id="dash-spend-rate" style="color:var(--color-text-muted);font-size:11px">0% من الدخل</span>
+        <span id="dash-net" style="font-weight:700;font-size:13px;font-family:var(--font-display)">0 ج.م</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions fade-in stagger-2">
+      <button class="qa-btn qa-income" onclick="App.openIncomeModal()">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
+        <span>دخل</span>
+      </button>
+      <button class="qa-btn qa-expense" onclick="App.openExpenseModal()">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-credit-card"/></svg>
+        <span>مصروف</span>
+      </button>
+      <button class="qa-btn qa-debt" onclick="App.navigateTo('debts')">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg>
+        <span>ديون</span>
+      </button>
+      <button class="qa-btn qa-invest" onclick="App.navigateTo('investments')">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
+        <span>استثمار</span>
+      </button>
+    </div>
+
+    <!-- Portfolio Summary (Debts + Investments) -->
+    <div class="stats-grid fade-in stagger-3" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+      <div class="stat-card orange">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg></div>
+        <div class="stat-label">الديون</div>
+        <div class="stat-value orange" id="dash-debts">0 ج.م</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg></div>
+        <div class="stat-label">الاستثمارات</div>
+        <div class="stat-value purple" id="dash-investments">0 ج.م</div>
+      </div>
+    </div>
+
+    <!-- Donut Chart -->
+    <div class="chart-container fade-in stagger-4">
+      <div class="chart-title">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-pie"/></svg>
+        توزيع الأموال
+      </div>
+      <div style="max-width:260px;margin:0 auto">
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card fade-in stagger-5">
+      <div class="section-header">
+        <div class="section-title">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-list"/></svg>
+          آخر المعاملات
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="App.navigateTo('transactions')">عرض الكل</button>
+      </div>
+      <div id="recent-transactions"></div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════
+       صفحة الدخل
+  ══════════════════════════════ -->
+  <section id="page-income" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-dollar"/></svg>
+        مصادر الدخل
+      </div>
+      <button class="btn btn-success btn-sm" onclick="App.openIncomeModal()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
+        إضافة
+      </button>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+      <div class="stat-card green">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-dollar"/></svg></div>
+        <div class="stat-label">إجمالي الدخل</div>
+        <div class="stat-value green" id="income-total">0 ج.م</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-bar-chart"/></svg></div>
+        <div class="stat-label">عدد المصادر</div>
+        <div class="stat-value cyan" id="income-count">0 مصدر</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="income-list"></div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════
+       صفحة المصروفات
+  ══════════════════════════════ -->
+  <section id="page-expenses" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-credit-card"/></svg>
+        المصروفات
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="App.openExpenseModal()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
+        إضافة
+      </button>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+      <div class="stat-card red">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-trending-down"/></svg></div>
+        <div class="stat-label">إجمالي المصروفات</div>
+        <div class="stat-value red" id="exp-total">0 ج.م</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-list"/></svg></div>
+        <div class="stat-label">عدد العمليات</div>
+        <div class="stat-value orange" id="exp-count">0 عملية</div>
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-pie"/></svg>
+          توزيع المصروفات
+        </div>
+      </div>
+      <div id="exp-categories-summary"></div>
+    </div>
+
+    <div class="chart-container mb-16">
+      <div class="chart-title">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-bar-chart"/></svg>
+        الإنفاق اليومي
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="expenses-list"></div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════
+       صفحة الديون
+  ══════════════════════════════ -->
+  <section id="page-debts" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg>
+        الديون
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="App.openDebtModal()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
+        إضافة
+      </button>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+      <div class="stat-card red">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg></div>
+        <div class="stat-label">إجمالي الديون</div>
+        <div class="stat-value red" id="debts-total">0 ج.م</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-alert"/></svg></div>
+        <div class="stat-label">عدد الديون</div>
+        <div class="stat-value orange" id="debts-count">0 دين</div>
+      </div>
+    </div>
+
+    <div id="debts-list"></div>
+
+  </section>
+
+  <!-- ══════════════════════════════
+       صفحة الاستثمارات
+  ══════════════════════════════ -->
+  <section id="page-investments" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
+        الاستثمارات
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="App.openInvestmentModal()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
+        إضافة
+      </button>
+    </div>
+
+    <div class="stats-grid mb-16">
+      <div class="stat-card purple">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-briefcase"/></svg></div>
+        <div class="stat-label">إجمالي رأس المال</div>
+        <div class="stat-value purple" id="inv-total-capital">0 ج.م</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg></div>
+        <div class="stat-label">إجمالي الأرباح</div>
+        <div class="stat-value gold" id="inv-total-profit">0 ج.م</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-bar-chart"/></svg></div>
+        <div class="stat-label">عدد الاستثمارات</div>
+        <div class="stat-value cyan" id="inv-count">0 استثمار</div>
+      </div>
+    </div>
+
+    <div id="investments-list"></div>
+
+  </section>
+
+  <!-- ══════════════════════════════
+       صفحة الميزانية
+  ══════════════════════════════ -->
+  <section id="page-budget" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-target"/></svg>
+        الميزانية الشهرية
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title">تحديد الميزانية</div>
+      </div>
+      <div id="budget-inputs"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">تقرير الاستخدام</div>
+      </div>
+      <div id="budget-report"></div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════
+       صفحة التحليلات
+  ══════════════════════════════ -->
+  <section id="page-analytics" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-gauge"/></svg>
+        التحليلات المالية
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title">المؤشرات الرئيسية</div>
+      </div>
+      <div id="analytics-table"></div>
+    </div>
+
+    <div class="chart-container mb-16">
+      <div class="chart-title">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-activity"/></svg>
+        تطور الرصيد خلال الشهر
+      </div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-title">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-pie"/></svg>
+        توزيع المصروفات حسب الفئة
+      </div>
+      <div style="max-width:270px;margin:0 auto">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════
+       صفحة المعاملات
+  ══════════════════════════════ -->
+  <section id="page-transactions" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-list"/></svg>
+        المعاملات
+      </div>
+      <span class="badge badge-cyan" id="tx-count">0 معاملة</span>
+    </div>
+
+    <div class="search-bar mb-16">
+      <span class="search-icon"><svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-search"/></svg></span>
+      <input type="text" id="tx-search" placeholder="ابحث في المعاملات...">
+    </div>
+
+    <div class="filter-bar mb-16">
+      <div class="filter-chip active" onclick="filterTx('all', this)">الكل</div>
+      <div class="filter-chip" onclick="filterTx('income', this)">الدخل</div>
+      <div class="filter-chip" onclick="filterTx('expense', this)">المصروفات</div>
+      <div class="filter-chip" onclick="filterTx('food', this)">طعام</div>
+      <div class="filter-chip" onclick="filterTx('transport', this)">مواصلات</div>
+      <div class="filter-chip" onclick="filterTx('education', this)">دراسة</div>
+      <div class="filter-chip" onclick="filterTx('shopping', this)">تسوق</div>
+    </div>
+
+    <div id="transactions-list"></div>
+
+  </section>
+
+
+  <!-- ══════════════════════════════
+       صفحة المزيد
+  ══════════════════════════════ -->
+  <section id="page-more" class="page">
+
+    <div class="section-header mb-16">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#ic-list"/></svg>
+        المزيد
+      </div>
+    </div>
+
+    <!-- روابط الصفحات الثانوية -->
+    <div class="more-nav-list card mb-16">
+      <button class="more-nav-item" onclick="App.navigateTo('debts')">
+        <div class="more-nav-icon orange">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">الديون</div>
+          <div class="more-nav-sub">تتبع ومتابعة الديون والاستحقاقات</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
+      <button class="more-nav-item" onclick="App.navigateTo('investments')">
+        <div class="more-nav-icon purple">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">الاستثمارات</div>
+          <div class="more-nav-sub">محفظتك الاستثمارية وعوائدها</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
+      <button class="more-nav-item" onclick="App.navigateTo('income')">
+        <div class="more-nav-icon green">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-dollar"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">مصادر الدخل</div>
+          <div class="more-nav-sub">راتب، عمل حر، مشاريع</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
+    </div>
+
+    <!-- الإعدادات والأدوات -->
+    <div class="more-nav-list card mb-16">
+      <div class="more-section-header">الإعدادات والأدوات</div>
+      <button class="more-nav-item" id="moreThemeBtn">
+        <div class="more-nav-icon brand">
+          <svg class="icon" id="moreThemeIcon" viewBox="0 0 24 24"><use href="#ic-sun"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">المظهر</div>
+          <div class="more-nav-sub" id="moreThemeLabel">الوضع الداكن</div>
+        </div>
+        <div class="more-toggle" id="moreThemeToggle">
+          <div class="more-toggle-thumb"></div>
+        </div>
+      </button>
+      <button class="more-nav-item" id="moreExportBtn">
+        <div class="more-nav-icon brand">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-download"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">تصدير البيانات</div>
+          <div class="more-nav-sub">حفظ نسخة احتياطية JSON</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
+      <button class="more-nav-item" id="moreImportBtn">
+        <div class="more-nav-icon brand">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-upload"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">استيراد البيانات</div>
+          <div class="more-nav-sub">استعادة نسخة احتياطية</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
+      <button class="more-nav-item" id="morePrintBtn">
+        <div class="more-nav-icon brand">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-printer"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">طباعة التقرير الشهري</div>
+          <div class="more-nav-sub">ملخص مالي قابل للطباعة</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
+    </div>
+
+    <!-- معلومات التطبيق -->
+    <div class="card">
+      <div style="text-align:center;padding:12px 0 4px">
+        <div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px">ميزانيتي</div>
+        <div style="font-size:11px;color:var(--color-text-muted)">v1.0 — Personal Finance Tracker</div>
+        <div style="font-size:11px;color:var(--color-text-muted);margin-top:2px">يعمل بالكامل بدون إنترنت</div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ════════════════════════════════════════
+     الشريط السفلي — 5 عناصر
+════════════════════════════════════════ -->
+<nav class="bottom-nav">
+  <button class="bottom-nav-item active" data-page="dashboard">
+    <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-home"/></svg></span>
+    <span class="nav-label">الرئيسية</span>
+  </button>
+  <button class="bottom-nav-item" data-page="transactions">
+    <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-list"/></svg></span>
+    <span class="nav-label">المعاملات</span>
+  </button>
+  <button class="bottom-nav-item fab-nav-center" data-page="expenses">
+    <span class="nav-icon-center">
+      <svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
+    </span>
+    <span class="nav-label">إضافة</span>
+  </button>
+  <button class="bottom-nav-item" data-page="analytics">
+    <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-gauge"/></svg></span>
+    <span class="nav-label">التحليلات</span>
+  </button>
+  <button class="bottom-nav-item" data-page="more">
+    <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-settings"/></svg></span>
+    <span class="nav-label">المزيد</span>
+  </button>
+</nav>
+
+<!-- FAB removed — center nav button used instead -->
+
+<!-- ════════════════════════════════════════
+     نافذة الدخل
+════════════════════════════════════════ -->
+<div id="incomeModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <svg class="icon" viewBox="0 0 24 24"><use href="#ic-dollar"/></svg>
+      إضافة دخل
+    </div>
+    <div class="form-group">
+      <label class="form-label">المسمى / اسم المصدر *</label>
+      <input type="text" id="inc-name" class="form-control" placeholder="مثال: راتب شهر يونيو">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">المبلغ (ج.م) *</label>
+        <input type="number" id="inc-amount" class="form-control" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">نوع المصدر</label>
+        <select id="inc-source" class="form-control">
+          <option value="salary">الراتب</option>
+          <option value="freelance">عمل حر</option>
+          <option value="business">أرباح مشاريع</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">التاريخ *</label>
+      <input type="date" id="inc-date" class="form-control">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ملاحظات</label>
+      <input type="text" id="inc-notes" class="form-control" placeholder="ملاحظات اختيارية...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-success btn-full" onclick="App.saveIncome()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
+        حفظ
+      </button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     نافذة المصروفات
+════════════════════════════════════════ -->
+<div id="expenseModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <svg class="icon" viewBox="0 0 24 24"><use href="#ic-credit-card"/></svg>
+      إضافة مصروف
+    </div>
+    <div class="form-group">
+      <label class="form-label">وصف المصروف *</label>
+      <input type="text" id="exp-name" class="form-control" placeholder="مثال: فاتورة الكهرباء">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">المبلغ (ج.م) *</label>
+        <input type="number" id="exp-amount" class="form-control" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الفئة</label>
+        <select id="exp-category" class="form-control">
+          <option value="food">الطعام</option>
+          <option value="transport">المواصلات</option>
+          <option value="education">الدراسة</option>
+          <option value="internet">إنترنت واتصالات</option>
+          <option value="health">الصحة</option>
+          <option value="entertainment">الترفيه</option>
+          <option value="shopping">التسوق</option>
+          <option value="bills">فواتير</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">التاريخ *</label>
+      <input type="date" id="exp-date" class="form-control">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ملاحظات</label>
+      <input type="text" id="exp-notes" class="form-control" placeholder="ملاحظات اختيارية...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-danger btn-full" onclick="App.saveExpense()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
+        حفظ
+      </button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     نافذة الديون
+════════════════════════════════════════ -->
+<div id="debtModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <svg class="icon" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg>
+      إضافة دين
+    </div>
+    <div class="form-group">
+      <label class="form-label">اسم الدائن *</label>
+      <input type="text" id="debt-creditor" class="form-control" placeholder="مثال: بنك مصر، علي محمد...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">إجمالي الدين (ج.م) *</label>
+        <input type="number" id="debt-amount" class="form-control" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">المبلغ المدفوع</label>
+        <input type="number" id="debt-paid" class="form-control" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">تاريخ الاستحقاق</label>
+      <input type="date" id="debt-due" class="form-control">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ملاحظات</label>
+      <input type="text" id="debt-notes" class="form-control" placeholder="شروط السداد، ملاحظات...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-primary btn-full" onclick="App.saveDebt()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
+        حفظ
+      </button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     نافذة الاستثمارات
+════════════════════════════════════════ -->
+<div id="investmentModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <svg class="icon" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
+      إضافة استثمار
+    </div>
+    <div class="form-group">
+      <label class="form-label">اسم الاستثمار *</label>
+      <input type="text" id="inv-name" class="form-control" placeholder="مثال: أسهم CIB، ذهب 21...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">نوع الاستثمار</label>
+        <select id="inv-type" class="form-control">
+          <option value="stocks">أسهم</option>
+          <option value="gold">ذهب</option>
+          <option value="realEstate">عقارات</option>
+          <option value="crypto">عملات رقمية</option>
+          <option value="savings">توفير</option>
+          <option value="other">أخرى</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">تاريخ البداية</label>
+        <input type="date" id="inv-start" class="form-control">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">رأس المال (ج.م) *</label>
+        <input type="number" id="inv-capital" class="form-control" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الأرباح / الخسائر</label>
+        <input type="number" id="inv-profit" class="form-control" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-primary btn-full" onclick="App.saveInvestment()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
+        حفظ
+      </button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     تأكيد الحذف
+════════════════════════════════════════ -->
+<div id="confirmDialog" class="confirm-dialog">
+  <div class="confirm-box">
+    <div class="confirm-box-icon">
+      <svg class="icon icon-lg" viewBox="0 0 24 24"><use href="#ic-trash"/></svg>
+    </div>
+    <div class="confirm-box-title">تأكيد الحذف</div>
+    <div class="confirm-box-text">هل أنت متأكد من حذف هذا العنصر؟<br>لا يمكن التراجع عن هذا الإجراء.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-danger btn-full" onclick="App.executeDelete()">حذف</button>
+      <button class="btn btn-ghost btn-full" onclick="App.cancelDelete()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ════════════════════════════════════════
+     Scripts
+════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
