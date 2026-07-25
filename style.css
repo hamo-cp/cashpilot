@@ -1950,3 +1950,52 @@ body.privacy-mode .progress-text {
   color: var(--color-text-muted);
   align-self: flex-end;
 }
+
+/* ══════════════════════════════════════
+   Market Ticker (Investments)
+══════════════════════════════════════ */
+.market-ticker {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none; /* Firefox */
+}
+.market-ticker::-webkit-scrollbar {
+  display: none;
+}
+.market-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.market-card-title {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.market-card-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.market-card-change {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.market-card-change.up {
+  color: var(--color-positive);
+}
+.market-card-change.down {
+  color: var(--color-negative);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

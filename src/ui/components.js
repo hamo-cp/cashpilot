@@ -6,6 +6,7 @@
 
 import { esc, svgIcon, formatCurrency, formatDate, formatPercent, daysUntil } from '../core/utils.js';
 import { EXPENSE_CATEGORIES, INCOME_SOURCES, INVESTMENT_TYPES }               from '../core/constants.js';
+import { t }                                                                   from '../core/i18n.js';
 
 /** تحويل اسم اللون لـ CSS variable key */
 function colorKey(color) {
@@ -166,7 +167,8 @@ export function debtCardHTML(debt) {
 /* ── Investment card ── */
 export function investmentCardHTML(inv) {
   const roi    = inv._roi ?? 0;
-  const profit = parseFloat(inv.profit) || 0;
+  const profit = inv._liveProfit ?? (parseFloat(inv.profit) || 0);
+  const total  = inv._liveTotal ?? ((parseFloat(inv.capital) || 0) + profit);
   const type   = INVESTMENT_TYPES[inv.type] || INVESTMENT_TYPES.other;
 
   return `
@@ -179,6 +181,7 @@ export function investmentCardHTML(inv) {
           </div>
           <div style="font-size:11px;color:var(--color-text-muted);margin-top:3px">
             ${type.label} · ${formatDate(inv.startDate)}
+            ${inv.quantity ? ` · ${inv.quantity} ${inv.type === 'stocks' ? 'سهم' : 'جرام'}` : ''}
           </div>
         </div>
         <div style="text-align:left">
@@ -203,7 +206,7 @@ export function investmentCardHTML(inv) {
         <div class="investment-detail">
           <div class="investment-detail-label">${t('comp_total')}</div>
           <div class="investment-detail-value" style="color:var(--color-warning)">
-            ${formatCurrency((parseFloat(inv.capital) || 0) + profit)}
+            ${formatCurrency(total)}
           </div>
         </div>
       </div>

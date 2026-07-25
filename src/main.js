@@ -42,7 +42,8 @@ import { renderDebts,
          saveDebt }           from './pages/debts.js';
 import { renderInvestments,
          openInvestmentModal,
-         saveInvestment }     from './pages/investments.js';
+         saveInvestment,
+         refreshMarket }     from './pages/investments.js';
 import { renderSubscriptions,
          openSubscriptionModal,
          saveSubscription }   from './pages/subscriptions.js';
@@ -60,7 +61,7 @@ function renderPage(page) {
     case 'income':        renderIncome();                           break;
     case 'expenses':      renderExpenses();                         break;
     case 'debts':         renderDebts();                            break;
-    case 'investments':   renderInvestments();                      break;
+    case 'investments':   renderInvestments().catch(console.error);  break;
     case 'subscriptions': renderSubscriptions();                    break;
     case 'budget':        renderBudget();  animateProgressBars();   break;
     case 'analytics':     renderAnalytics(); animateProgressBars(); break;
@@ -167,6 +168,7 @@ function bindMorePageEvents() {
   document.getElementById('moreLangBtn')?.addEventListener('click', () => {
     const newLang = toggleLang();
     Toast.show(t('toast_lang'));
+    translatePage();
     renderPage(getState().currentPage);
   });
 
@@ -187,18 +189,23 @@ function bindMorePageEvents() {
 
 function bindPWAInstall() {
   let deferredPrompt;
+  const btn = document.getElementById('installBtn');
+  if (!btn) return;
+
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    const btn = document.getElementById('installBtn');
-    if (btn) {
-      btn.style.display = 'flex';
-      btn.addEventListener('click', () => {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          deferredPrompt       = null;
-          btn.style.display    = 'none';
-        });
+    btn.style.display = 'flex';
+  });
+
+  btn.addEventListener('click', () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          btn.style.display = 'none';
+        }
+        deferredPrompt = null;
       });
     }
   });
@@ -339,6 +346,7 @@ export const App = {
   openExpenseModal:    (id) => { setState({ editingId: id || null }); openExpenseModal(id); openModal('expenseModal'); },
   openDebtModal:       (id) => { setState({ editingId: id || null }); openDebtModal(id); openModal('debtModal'); },
   openInvestmentModal: (id) => { setState({ editingId: id || null }); openInvestmentModal(id); openModal('investmentModal'); },
+  refreshMarket,
   openSubscriptionModal: (id) => { setState({ editingId: id || null }); openSubscriptionModal(id); openModal('subscriptionModal'); },
   openModal,
   closeModal,
@@ -411,11 +419,8 @@ export const App = {
   },
 };
 
-/* ════════════════════════════════════════
-   Bootstrap — يعمل عند تحميل DOM
-   ════════════════════════════════════════ */
+/* ════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Defensive: إخفاء splash screen دائماً حتى عند crash
   const _emergencyHide = setTimeout(() => {
     document.getElementById('welcomeScreen')?.remove();
   }, 5000);
@@ -426,6 +431,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Chart.js defaults
     applyGlobalDefaults();
+
+    // Privacy Toggle
+    document.getElementById('privacyBtn')?.addEventListener('click', () => {
+      document.body.classList.toggle('privacy-mode');
+      const icon = document.getElementById('privacyIcon');
+      if (icon) {
+        if (document.body.classList.contains('privacy-mode')) {
+          icon.innerHTML = '<use href="#ic-eye-off"/>';
+        } else {
+          icon.innerHTML = '<use href="#ic-eye"/>';
+        }
+      }
+    });
 
     // 3. Theme
     const { theme } = getSettings();
