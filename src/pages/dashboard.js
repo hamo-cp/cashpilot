@@ -8,6 +8,7 @@ import { formatCurrency, formatPercent, animateValue } from '../core/utils.js';
 import * as Finance              from '../services/finance.js';
 import { renderDonutChart }      from '../charts/charts.js';
 import { txItemHTML, emptyStateHTML } from '../ui/components.js';
+import { t }                     from '../core/i18n.js';
 
 /** تحديث عنصر نصي بالمعرّف */
 function set(id, value) {
@@ -28,8 +29,8 @@ export function renderDashboard() {
   // Hero greeting
   const now      = new Date();
   const hour     = now.getHours();
-  const greeting = hour < 12 ? 'صباح الخير' : hour < 18 ? 'مساء الخير' : 'مساء النور';
-  const dateStr  = now.toLocaleDateString('ar-EG', {
+  const greeting = hour < 12 ? t('greeting_am') : hour < 18 ? t('greeting_pm') : t('greeting_eve');
+  const dateStr  = now.toLocaleDateString(t('locale'), {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
 
@@ -43,7 +44,7 @@ export function renderDashboard() {
   setAnim('dash-debts',       summary.debts);
   setAnim('dash-investments', summary.investments);
   setAnim('dash-saving-rate', summary.savingRate, formatPercent);
-  setAnim('dash-spend-rate',  summary.spendRate, v => formatPercent(v) + ' من الدخل');
+  setAnim('dash-spend-rate',  summary.spendRate, v => formatPercent(v) + ' ' + t('dash_spend_rate'));
 
   // Net Worth row
   setAnim('dash-assets',      summary.income + summary.investments);

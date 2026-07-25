@@ -94,6 +94,8 @@
   <symbol id="ic-other" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></symbol>
   <!-- line-chart -->
   <symbol id="ic-linechart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></symbol>
+  <!-- pie-chart -->
+  <symbol id="ic-pie-chart" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></symbol>
   <!-- gauge (analytics) -->
   <symbol id="ic-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
   <!-- building-2 (real estate) -->
@@ -108,6 +110,13 @@
   <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
   <!-- alert-triangle -->
   <symbol id="ic-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></symbol>
+  <!-- eye / eye-off -->
+  <symbol id="ic-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+  <symbol id="ic-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></symbol>
+  <!-- bell notification icon -->
+  <symbol id="ic-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <!-- bell-off -->
+  <symbol id="ic-bell-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 0 0-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
 </svg>
 
 <!-- ════════════════════════════════════════
@@ -117,7 +126,7 @@
   <div class="welcome-logo">
     <svg class="icon icon-xl" viewBox="0 0 24 24"><use href="#ic-wallet"/></svg>
   </div>
-  <div class="welcome-title">ميزانيتي</div>
+  <div class="welcome-title" data-i18n="welcome_title">ميزانيتي</div>
   <div class="welcome-subtitle">مدير الميزانية الشخصية</div>
   <div class="loading-spinner"></div>
 </div>
@@ -130,7 +139,7 @@
     <div class="nav-logo">
       <svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-wallet"/></svg>
     </div>
-    <div class="nav-title">ميزانيتي<span>.</span></div>
+    <div class="nav-title" data-i18n="welcome_title">ميزانيتي<span>.</span></div>
   </div>
 
   <div class="time-filter" style="margin:0;flex:1;justify-content:center;max-width:220px">
@@ -139,7 +148,15 @@
   </div>
 
   <div class="nav-actions">
-    <button id="installBtn" class="nav-btn" style="display:none" title="تثبيت التطبيق">
+    <!-- زر الإشعارات -->
+    <button id="notifBtn" class="nav-btn notif-btn-wrapper" title="الإشعارات" aria-label="Notifications" onclick="App.navigateTo('notifications')">
+      <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-bell"/></svg>
+      <span id="notif-badge" class="notif-badge" style="display:none">0</span>
+    </button>
+    <button id="privacyBtn" class="nav-btn" data-i18n-title="nav_home">
+      <svg class="icon icon-sm" id="privacyIcon"><use href="#ic-eye"/></svg>
+    </button>
+    <button id="installBtn" class="nav-btn" data-i18n-title="nav_home">
       <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-smartphone"/></svg>
     </button>
     <!-- hidden — controlled from More page -->
@@ -151,6 +168,8 @@
     <input type="file" id="importFile" accept=".json" style="display:none">
   </div>
 </nav>
+
+
 
 <!-- ════════════════════════════════════════
      المحتوى الرئيسي
@@ -167,21 +186,21 @@
       <div class="hero-date" id="dash-date"></div>
       <div class="hero-title" id="dash-greeting">مرحباً</div>
       <div class="hero-balance" id="dash-net-balance">0 ج.م</div>
-      <div class="hero-balance-label">صافي الرصيد الشهري</div>
+      <div class="hero-balance-label" data-i18n="dash_net_balance">صافي الرصيد الشهري</div>
       <!-- Net Worth Mini Row -->
       <div class="net-worth-row">
         <div class="net-worth-item">
-          <div class="nw-label">الأصول</div>
+          <div class="nw-label" data-i18n="dash_assets">الأصول</div>
           <div class="nw-value positive" id="dash-assets">0 ج.م</div>
         </div>
         <div class="net-worth-divider"></div>
         <div class="net-worth-item">
-          <div class="nw-label">الالتزامات</div>
+          <div class="nw-label" data-i18n="dash_liabilities">الالتزامات</div>
           <div class="nw-value negative" id="dash-liabilities">0 ج.م</div>
         </div>
         <div class="net-worth-divider"></div>
         <div class="net-worth-item">
-          <div class="nw-label">الادخار</div>
+          <div class="nw-label" data-i18n="dash_saving_rate">الادخار</div>
           <div class="nw-value brand" id="dash-saving-rate">0%</div>
         </div>
       </div>
@@ -189,14 +208,14 @@
 
     <!-- Cash Flow -->
     <div class="cash-flow-card fade-in stagger-1">
-      <div class="cf-label">التدفق النقدي هذا الشهر</div>
+      <div class="cf-label" data-i18n="dash_cash_flow">التدفق النقدي هذا الشهر</div>
       <div class="cf-row">
         <div class="cf-item cf-income">
           <div class="cf-icon">
             <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
           </div>
           <div>
-            <div class="cf-title">دخل</div>
+            <div class="cf-title" data-i18n="dash_income">دخل</div>
             <div class="cf-amount" id="dash-income">0 ج.م</div>
           </div>
         </div>
@@ -208,7 +227,7 @@
             <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-credit-card"/></svg>
           </div>
           <div>
-            <div class="cf-title">مصروفات</div>
+            <div class="cf-title" data-i18n="dash_expenses">مصروفات</div>
             <div class="cf-amount" id="dash-expenses">0 ج.م</div>
           </div>
         </div>
@@ -238,7 +257,7 @@
     <div class="card glass-card fade-in stagger-2" style="margin-bottom: 16px;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <div style="font-size: 11.5px; color: var(--color-text-muted); font-weight: 600; margin-bottom: 2px;">المبلغ الآمن للإنفاق اليومي</div>
+          <div style="font-size: 11.5px; color: var(--color-text-muted); font-weight: 600; margin-bottom: 2px;" data-i18n="dash_safe_spend">المبلغ الآمن للإنفاق اليومي</div>
           <div id="dash-safe-spend" style="font-size: 22px; font-weight: 800; color: var(--color-positive); font-family: var(--font-display);">0 ج.م</div>
         </div>
         <div style="background: var(--color-positive-dim); padding: 10px; border-radius: 50%;">
@@ -250,19 +269,19 @@
     <div class="quick-actions fade-in stagger-2">
       <button class="qa-btn qa-income" onclick="App.openIncomeModal()">
         <svg class="icon" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
-        <span>دخل</span>
+        <span data-i18n="dash_income">دخل</span>
       </button>
       <button class="qa-btn qa-expense" onclick="App.openExpenseModal()">
         <svg class="icon" viewBox="0 0 24 24"><use href="#ic-credit-card"/></svg>
-        <span>مصروف</span>
+        <span data-i18n="dash_expenses">مصروف</span>
       </button>
       <button class="qa-btn qa-debt" onclick="App.navigateTo('debts')">
         <svg class="icon" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg>
-        <span>ديون</span>
+        <span data-i18n="more_debts">ديون</span>
       </button>
       <button class="qa-btn qa-invest" onclick="App.navigateTo('investments')">
         <svg class="icon" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
-        <span>استثمار</span>
+        <span data-i18n="more_inv">استثمار</span>
       </button>
     </div>
 
@@ -270,12 +289,12 @@
     <div class="stats-grid fade-in stagger-3" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
       <div class="stat-card orange">
         <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg></div>
-        <div class="stat-label">الديون</div>
+        <div class="stat-label" data-i18n="more_debts">الديون</div>
         <div class="stat-value orange" id="dash-debts">0 ج.م</div>
       </div>
       <div class="stat-card purple">
         <div class="stat-icon"><svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg></div>
-        <div class="stat-label">الاستثمارات</div>
+        <div class="stat-label" data-i18n="more_inv">الاستثمارات</div>
         <div class="stat-value purple" id="dash-investments">0 ج.م</div>
       </div>
     </div>
@@ -298,7 +317,7 @@
           <svg class="icon" viewBox="0 0 24 24"><use href="#ic-list"/></svg>
           آخر المعاملات
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="App.navigateTo('transactions')">عرض الكل</button>
+        <button class="btn btn-ghost btn-sm" onclick="App.navigateTo('transactions')" data-i18n="dash_view_all">عرض الكل</button>
       </div>
       <div id="recent-transactions"></div>
     </div>
@@ -508,7 +527,7 @@
 
     <!-- Financial Health Score (New) -->
     <div class="card glass-card mb-16 fade-in stagger-1" style="text-align: center; padding: 24px;">
-      <div style="font-size: 13px; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">مؤشر الصحة المالية</div>
+      <div style="font-size: 13px; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 12px;" data-i18n="stat_health">مؤشر الصحة المالية</div>
       <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
         <svg viewBox="0 0 36 36" style="width: 100%; height: 100%;">
           <path class="circle-bg"
@@ -532,7 +551,7 @@
 
     <div class="card glass-card mb-16 fade-in stagger-2">
       <div class="section-header">
-        <div class="section-title">المؤشرات الرئيسية</div>
+        <div class="section-title" data-i18n="stat_key_metrics">المؤشرات الرئيسية</div>
       </div>
       <div id="analytics-table"></div>
     </div>
@@ -574,13 +593,13 @@
 
     <div class="search-bar mb-16">
       <span class="search-icon"><svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-search"/></svg></span>
-      <input type="text" id="tx-search" placeholder="ابحث في المعاملات...">
+      <input type="text" id="tx-search" data-i18n-placeholder="tx_search_placeholder" placeholder="ابحث في المعاملات...">
     </div>
 
     <div class="filter-bar mb-16">
-      <div class="filter-chip active" onclick="filterTx('all', this)">الكل</div>
-      <div class="filter-chip" onclick="filterTx('income', this)">الدخل</div>
-      <div class="filter-chip" onclick="filterTx('expense', this)">المصروفات</div>
+      <div class="filter-chip active" onclick="filterTx('all', this)" data-i18n="tx_all">الكل</div>
+      <div class="filter-chip" onclick="filterTx('income', this)" data-i18n="tx_income">الدخل</div>
+      <div class="filter-chip" onclick="filterTx('expense', this)" data-i18n="tx_expenses">المصروفات</div>
       <div class="filter-chip" onclick="filterTx('food', this)">طعام</div>
       <div class="filter-chip" onclick="filterTx('transport', this)">مواصلات</div>
       <div class="filter-chip" onclick="filterTx('education', this)">دراسة</div>
@@ -606,12 +625,22 @@
 
     <!-- روابط الصفحات الثانوية -->
     <div class="more-nav-list card mb-16">
+      <button class="more-nav-item" onclick="App.navigateTo('budget')">
+        <div class="more-nav-icon" style="color: var(--color-brand); background: rgba(79,124,255,0.15);">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-pie-chart"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">الميزانية المخصصة</div>
+          <div class="more-nav-sub">تحديد سقف الإنفاق لكل فئة</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
       <button class="more-nav-item" onclick="App.navigateTo('debts')">
         <div class="more-nav-icon orange">
           <svg class="icon" viewBox="0 0 24 24"><use href="#ic-landmark"/></svg>
         </div>
         <div class="more-nav-info">
-          <div class="more-nav-title">الديون</div>
+          <div class="more-nav-title" data-i18n="more_debts">الديون</div>
           <div class="more-nav-sub">تتبع ومتابعة الديون والاستحقاقات</div>
         </div>
         <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
@@ -621,7 +650,7 @@
           <svg class="icon" viewBox="0 0 24 24"><use href="#ic-trending-up"/></svg>
         </div>
         <div class="more-nav-info">
-          <div class="more-nav-title">الاستثمارات</div>
+          <div class="more-nav-title" data-i18n="more_inv">الاستثمارات</div>
           <div class="more-nav-sub">محفظتك الاستثمارية وعوائدها</div>
         </div>
         <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
@@ -636,11 +665,40 @@
         </div>
         <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
       </button>
+      <button class="more-nav-item" onclick="App.navigateTo('subscriptions')">
+        <div class="more-nav-icon" style="color: #ff9800; background: rgba(255,152,0,0.15);">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-clock"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title">الاشتراكات الشهرية</div>
+          <div class="more-nav-sub">تتبع اشتراكاتك الدورية والفواتير</div>
+        </div>
+        <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
+      </button>
     </div>
 
     <!-- الإعدادات والأدوات -->
     <div class="more-nav-list card mb-16">
-      <div class="more-section-header">الإعدادات والأدوات</div>
+      <div class="more-section-header" data-i18n="more_settings">الإعدادات والأدوات</div>
+      <button class="more-nav-item" id="moreNotifBtn" onclick="App.openModal('modal-notif-settings')">
+        <div class="more-nav-icon" style="background:rgba(79,124,255,0.15);color:var(--color-brand)">
+          <svg class="icon" viewBox="0 0 24 24"><use href="#ic-bell"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title" data-i18n="notif_settings">إعدادات الإشعارات</div>
+          <div class="more-nav-sub" id="notifPermissionLabel" data-i18n="notif_settings_sub">تفعيل تنبيهات الهاتف</div>
+        </div>
+        <span id="notif-perm-badge" class="notif-perm-status">⚡</span>
+      </button>
+      <button class="more-nav-item" id="moreLangBtn">
+        <div class="more-nav-icon brand">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="more-nav-info">
+          <div class="more-nav-title" data-i18n="more_lang">تغيير اللغة</div>
+          <div class="more-nav-sub" data-i18n="more_lang_sub">التحويل للإنجليزية</div>
+        </div>
+      </button>
       <button class="more-nav-item" id="moreThemeBtn">
         <div class="more-nav-icon brand">
           <svg class="icon" id="moreThemeIcon" viewBox="0 0 24 24"><use href="#ic-sun"/></svg>
@@ -658,7 +716,7 @@
           <svg class="icon" viewBox="0 0 24 24"><use href="#ic-download"/></svg>
         </div>
         <div class="more-nav-info">
-          <div class="more-nav-title">تصدير البيانات</div>
+          <div class="more-nav-title" data-i18n="more_export">تصدير البيانات</div>
           <div class="more-nav-sub">حفظ نسخة احتياطية JSON</div>
         </div>
         <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
@@ -668,7 +726,7 @@
           <svg class="icon" viewBox="0 0 24 24"><use href="#ic-upload"/></svg>
         </div>
         <div class="more-nav-info">
-          <div class="more-nav-title">استيراد البيانات</div>
+          <div class="more-nav-title" data-i18n="more_import">استيراد البيانات</div>
           <div class="more-nav-sub">استعادة نسخة احتياطية</div>
         </div>
         <svg class="icon icon-sm more-nav-arrow" viewBox="0 0 24 24"><use href="#ic-chevron-left"/></svg>
@@ -688,13 +746,60 @@
     <!-- معلومات التطبيق -->
     <div class="card">
       <div style="text-align:center;padding:12px 0 4px">
-        <div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px">ميزانيتي</div>
+        <div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--color-text-primary);margin-bottom:3px" data-i18n="welcome_title">ميزانيتي</div>
         <div style="font-size:11px;color:var(--color-text-muted)">v1.0 — Personal Finance Tracker</div>
         <div style="font-size:11px;color:var(--color-text-muted);margin-top:2px">يعمل بالكامل بدون إنترنت</div>
       </div>
     </div>
 
   </section>
+
+    <!-- ══════════════════════════════
+         صفحة الإشعارات (Notifications Page)
+    ══════════════════════════════ -->
+    <section id="page-notifications" class="page">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-ghost" onclick="App.navigateTo('dashboard')" style="padding:8px">
+            <svg class="icon" viewBox="0 0 24 24"><use href="#ic-chevron-right"/></svg>
+          </button>
+          <h2 class="page-title" data-i18n="notif_title" style="margin:0;">الإشعارات</h2>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" id="notifMarkAllBtn" data-i18n="notif_mark_all" style="font-size:12px;padding:6px 12px;">تحديد كمقروء</button>
+          <button class="btn btn-ghost danger" id="notifClearBtn" data-i18n="notif_clear_all" style="font-size:12px;padding:6px 12px;">حذف</button>
+        </div>
+      </div>
+      
+      <div id="notif-list" class="notif-list-page" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div id="notif-empty" class="notif-empty-page" style="display:none;flex-direction:column;align-items:center;padding:40px 20px;text-align:center;color:var(--color-text-muted);">
+        <div style="font-size:48px;margin-bottom:16px;">🔕</div>
+        <p data-i18n="notif_empty">لا توجد إشعارات حالياً</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════
+         صفحة الاشتراكات (Subscriptions Page)
+    ══════════════════════════════ -->
+    <section id="page-subscriptions" class="page">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-ghost" onclick="App.navigateTo('more')" style="padding:8px">
+            <svg class="icon" viewBox="0 0 24 24"><use href="#ic-chevron-right"/></svg>
+          </button>
+          <h2 class="page-title" style="margin:0;">الاشتراكات الدورية</h2>
+        </div>
+        <button class="btn btn-primary" onclick="App.openSubscriptionModal()" style="padding:6px 12px;font-size:12px;">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-plus"/></svg> جديد
+        </button>
+      </div>
+      
+      <div id="subs-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div id="subs-empty" class="empty-state" style="display:none;flex-direction:column;align-items:center;padding:40px 20px;text-align:center;color:var(--color-text-muted);">
+        <div style="font-size:48px;margin-bottom:16px;">📅</div>
+        <p>لا توجد اشتراكات مضافة بعد</p>
+      </div>
+    </section>
 
 </main>
 
@@ -704,25 +809,25 @@
 <nav class="bottom-nav">
   <button class="bottom-nav-item active" data-page="dashboard">
     <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-home"/></svg></span>
-    <span class="nav-label">الرئيسية</span>
+    <span class="nav-label" data-i18n="nav_home">الرئيسية</span>
   </button>
   <button class="bottom-nav-item" data-page="transactions">
     <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-list"/></svg></span>
-    <span class="nav-label">المعاملات</span>
+    <span class="nav-label" data-i18n="nav_transactions">المعاملات</span>
   </button>
   <button class="bottom-nav-item fab-nav-center" data-page="expenses">
     <span class="nav-icon-center">
       <svg class="icon icon-md" viewBox="0 0 24 24"><use href="#ic-plus"/></svg>
     </span>
-    <span class="nav-label">إضافة</span>
+    <span class="nav-label" data-i18n="add">إضافة</span>
   </button>
   <button class="bottom-nav-item" data-page="analytics">
     <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-gauge"/></svg></span>
-    <span class="nav-label">التحليلات</span>
+    <span class="nav-label" data-i18n="nav_analytics">التحليلات</span>
   </button>
   <button class="bottom-nav-item" data-page="more">
     <span class="nav-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#ic-settings"/></svg></span>
-    <span class="nav-label">المزيد</span>
+    <span class="nav-label" data-i18n="nav_more">المزيد</span>
   </button>
 </nav>
 
@@ -762,7 +867,7 @@
       <input type="date" id="inc-date" class="form-control">
     </div>
     <div class="form-group">
-      <label class="form-label">ملاحظات</label>
+      <label class="form-label" data-i18n="label_notes">ملاحظات</label>
       <input type="text" id="inc-notes" class="form-control" placeholder="ملاحظات اختيارية...">
     </div>
     <div style="display:flex;gap:10px;margin-top:20px">
@@ -770,7 +875,7 @@
         <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
         حفظ
       </button>
-      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px" data-i18n="cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -795,7 +900,7 @@
         <input type="number" id="exp-amount" class="form-control" placeholder="0.00" min="0" step="0.01">
       </div>
       <div class="form-group">
-        <label class="form-label">الفئة</label>
+        <label class="form-label" data-i18n="label_category">الفئة</label>
         <select id="exp-category" class="form-control">
           <option value="food">الطعام</option>
           <option value="transport">المواصلات</option>
@@ -814,7 +919,7 @@
       <input type="date" id="exp-date" class="form-control">
     </div>
     <div class="form-group">
-      <label class="form-label">ملاحظات</label>
+      <label class="form-label" data-i18n="label_notes">ملاحظات</label>
       <input type="text" id="exp-notes" class="form-control" placeholder="ملاحظات اختيارية...">
     </div>
     <div style="display:flex;gap:10px;margin-top:20px">
@@ -822,7 +927,7 @@
         <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
         حفظ
       </button>
-      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px" data-i18n="cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -847,16 +952,16 @@
         <input type="number" id="debt-amount" class="form-control" placeholder="0.00" min="0" step="0.01">
       </div>
       <div class="form-group">
-        <label class="form-label">المبلغ المدفوع</label>
+        <label class="form-label" data-i18n="label_paid_amount">المبلغ المدفوع</label>
         <input type="number" id="debt-paid" class="form-control" placeholder="0.00" min="0" step="0.01">
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">تاريخ الاستحقاق</label>
+      <label class="form-label" data-i18n="label_due_date">تاريخ الاستحقاق</label>
       <input type="date" id="debt-due" class="form-control">
     </div>
     <div class="form-group">
-      <label class="form-label">ملاحظات</label>
+      <label class="form-label" data-i18n="label_notes">ملاحظات</label>
       <input type="text" id="debt-notes" class="form-control" placeholder="شروط السداد، ملاحظات...">
     </div>
     <div style="display:flex;gap:10px;margin-top:20px">
@@ -864,7 +969,7 @@
         <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
         حفظ
       </button>
-      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px" data-i18n="cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -915,7 +1020,7 @@
         <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
         حفظ
       </button>
-      <button class="btn btn-ghost modal-close-btn" style="min-width:76px">إلغاء</button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px" data-i18n="cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -932,7 +1037,109 @@
     <div class="confirm-box-text">هل أنت متأكد من حذف هذا العنصر؟<br>لا يمكن التراجع عن هذا الإجراء.</div>
     <div class="confirm-actions">
       <button class="btn btn-danger btn-full" onclick="App.executeDelete()">حذف</button>
-      <button class="btn btn-ghost btn-full" onclick="App.cancelDelete()">إلغاء</button>
+      <button class="btn btn-ghost btn-full" onclick="App.cancelDelete()" data-i18n="cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     إضافة/تعديل اشتراك
+════════════════════════════════════════ -->
+<div id="subscriptionModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <svg class="icon" viewBox="0 0 24 24"><use href="#ic-clock"/></svg>
+      إضافة اشتراك
+    </div>
+    <div class="form-group">
+      <label class="form-label">اسم الاشتراك *</label>
+      <input type="text" id="sub-name" class="form-control" placeholder="مثال: نتفليكس، جيم، انترنت...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">التكلفة (ج.م) *</label>
+      <input type="number" id="sub-amount" class="form-control" placeholder="0.00" min="0" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">موعد التجديد (شهرياً)</label>
+      <input type="date" id="sub-due" class="form-control">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-primary btn-full" onclick="App.saveSubscription()">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><use href="#ic-save"/></svg>
+        حفظ
+      </button>
+      <button class="btn btn-ghost modal-close-btn" style="min-width:76px" data-i18n="cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     إعدادات الإشعارات
+════════════════════════════════════════ -->
+<div id="modal-notif-settings" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">
+      <svg class="icon" viewBox="0 0 24 24"><use href="#ic-bell"/></svg>
+      إعدادات الإشعارات
+    </div>
+    
+    <div class="settings-list">
+      <div class="settings-item" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--color-border)">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:var(--color-text-primary)">تنبيهات النظام (Push)</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">تلقي إشعارات على الهاتف في الخلفية</div>
+        </div>
+        <button id="togglePushBtn" class="btn btn-outline" style="padding:6px 12px;font-size:12px;" onclick="App.togglePushNotifications()">تفعيل</button>
+      </div>
+      
+      <div class="settings-item" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:var(--color-text-primary)">تنبيهات الميزانية الذكية</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">تحذير عند تجاوز الميزانية</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleSmartBudget" checked onchange="App.saveNotifSettings()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="settings-item" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--color-border);">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:var(--color-text-primary)">تنبيهات الديون المستحقة</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">تذكير بمواعيد السداد</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleSmartDebts" checked onchange="App.saveNotifSettings()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="settings-item" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--color-border);">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:var(--color-text-primary)">نصائح التحليل الذكي</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">اقتراحات للادخار والاستثمار</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleSmartInsights" checked onchange="App.saveNotifSettings()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="settings-item" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--color-border);">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:var(--color-text-primary)">الملخص الأسبوعي</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px">نظرة عامة على أدائك كل أسبوع</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleWeeklySummary" checked onchange="App.saveNotifSettings()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    
+    <div style="display:flex;gap:10px;margin-top:24px">
+      <button class="btn btn-primary btn-full modal-close-btn">حسناً</button>
     </div>
   </div>
 </div>

@@ -2,6 +2,7 @@
  * @module pages/income
  */
 import { getState }                          from '../core/state.js';
+import { t } from '../core/i18n.js';
 import { formatCurrency, formatDate, matchPeriod, today } from '../core/utils.js';
 import * as Finance                          from '../services/finance.js';
 import { incomeItemHTML, emptyStateHTML }    from '../ui/components.js';
@@ -57,10 +58,10 @@ export function saveIncome(editingId, onDone) {
   const notes  = document.getElementById('inc-notes')?.value.trim() || '';
 
   if (!name)                        return Toast.show('أدخل اسم مصدر الدخل', 'error');
-  if (name.length > 100)            return Toast.show('الاسم طويل جداً (100 حرف كحد أقصى)', 'error');
+  if (name.length > 100)            return Toast.show(t('toast_invalid'), 'error');
   if (!amountEl?.value.trim())      return Toast.show('أدخل المبلغ', 'error');
   if (isNaN(amount) || amount <= 0) return Toast.show('المبلغ يجب أن يكون رقماً موجباً', 'error');
-  if (amount > 999_999_999)         return Toast.show('المبلغ كبير جداً', 'error');
+  if (amount > 999_999_999)         return Toast.show(t('toast_invalid'), 'error');
   if (!date)                        return Toast.show('أدخل التاريخ', 'error');
 
   const data = { name, amount, source, date, notes };

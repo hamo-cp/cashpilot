@@ -1,3 +1,4 @@
+import { t } from '../core/i18n.js';
 /**
  * @module charts/charts
  * @description جميع دوال رسم الـ Charts — كل دالة تُنشئ أو تُحدّث chart واحد.
@@ -50,7 +51,7 @@ export function renderDonutChart(summary) {
     getCharts().donut = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['المصروفات', 'الادخار', 'الديون', 'الاستثمارات'],
+      labels: [t('dash_expenses'), t('dash_saving_rate'), t('more_debts'), t('more_inv')],
       datasets: [{
         data: [
           Math.max(0, summary.expenses),
@@ -104,7 +105,7 @@ export function renderBarChart(dailyData) {
     data: {
       labels,
       datasets: [{
-        label:           'الإنفاق اليومي',
+        label:           t('chart_daily_spend'),
         data,
         backgroundColor: 'hsla(0,84%,60%,0.5)',
         borderColor:     CHART_COLORS.expenses,
@@ -129,7 +130,7 @@ export function renderBarChart(dailyData) {
           ticks: {
             color:    tickColor,
             font:     { size: 10 },
-            callback: (v) => v >= 1000 ? (v / 1000).toFixed(0) + 'ك' : v,
+            callback: (v) => v >= 1000 ? (v / 1000).toFixed(0) + t('abbr_k') : v,
           },
         },
       },
@@ -158,7 +159,7 @@ export function renderLineChart(trend) {
     data: {
       labels: trend.labels,
       datasets: [{
-        label:                    'الرصيد',
+        label:                    t('balance'),
         data:                     trend.data,
         borderColor:              CHART_COLORS.brand,
         backgroundColor:          'hsla(224,100%,65%,0.06)',
@@ -188,7 +189,7 @@ export function renderLineChart(trend) {
           ticks: {
             color:    tickColor,
             font:     { size: 10 },
-            callback: (v) => v >= 1000 ? (v / 1000).toFixed(1) + 'ك' : v,
+            callback: (v) => v >= 1000 ? (v / 1000).toFixed(1) + t('abbr_k') : v,
           },
         },
       },
@@ -217,7 +218,7 @@ export function renderCategoryChart(byCat) {
   getCharts().category = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: entries.map(([k]) => (EXPENSE_CATEGORIES[k] || EXPENSE_CATEGORIES.other).label),
+      labels: entries.map(([k]) => t((EXPENSE_CATEGORIES[k] || EXPENSE_CATEGORIES.other).label)),
       datasets: [{
         data:            entries.map(([, v]) => v),
         backgroundColor: PALETTE.slice(0, entries.length),

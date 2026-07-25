@@ -6,6 +6,8 @@
 
 import * as DB from '../storage/db.js';
 import { uid, today, matchPeriod } from '../core/utils.js';
+import { t } from '../core/i18n.js';
+import { EXPENSE_CATEGORIES } from '../core/constants.js';
 
 /* ── تنظيف record يأتي من localStorage — يمنع crash عند بيانات تالفة ── */
 function sanitizeAmount(val) {
@@ -191,6 +193,35 @@ export function totalInvestmentProfit() {
 }
 
 /* ════════════════════════════════════════
+   الاشتراكات الشهرية
+   ════════════════════════════════════════ */
+
+export function getSubscriptions() {
+  return DB.getArray(DB.KEYS.SUBSCRIPTIONS);
+}
+
+export function addSubscription(item) {
+  const list = getSubscriptions();
+  const newItem = { id: uid(), createdAt: today(), ...item };
+  list.push(newItem);
+  DB.setArray(DB.KEYS.SUBSCRIPTIONS, list);
+  return newItem;
+}
+
+export function updateSubscription(id, updates) {
+  const list = getSubscriptions();
+  const idx  = list.findIndex(i => i.id === id);
+  if (idx === -1) return false;
+  list[idx] = { ...list[idx], ...updates };
+  DB.setArray(DB.KEYS.SUBSCRIPTIONS, list);
+  return true;
+}
+
+export function deleteSubscription(id) {
+  DB.setArray(DB.KEYS.SUBSCRIPTIONS, getSubscriptions().filter(i => i.id !== id));
+}
+
+/* ════════════════════════════════════════
    الميزانية
    ════════════════════════════════════════ */
 
@@ -309,23 +340,24 @@ export function getSafeToSpend(summary, month, year) {
 
 export function getSmartInsight(summary, month, year) {
   if (summary.expenses === 0 && summary.income === 0) {
-    return "لا توجد بيانات كافية لهذا الشهر. ابدأ بإضافة الدخل والمصروفات!";
+    return t('tip_no_data') || "Not enough data for this month. Start by adding income and expenses!";
   }
   if (summary.budgetRate > 100) {
-    return "لقد تجاوزت الميزانية المحددة! راجع نفقاتك لتقليل العجز.";
+    return t('tip_budget_over') || "You have exceeded your budget! Try to reduce your expenses.";
   }
   if (summary.savingRate >= 20) {
-    return "أداؤك متميز! أنت تدخر جزءاً كبيراً من دخلك هذا الشهر.";
+    return t('tip_excellent') || "Excellent performance! You are saving a large part of your income this month.";
   }
   if (summary.spendRate > 90) {
-    return "احترس: معدل إنفاقك مرتفع جداً وقد لا يتبقى لك رصيد كافٍ.";
+    return t('tip_warning') || "Warning: Your spending rate is very high and you may not have enough balance.";
   }
   
   const categories = expensesByCategory(month, year);
   const topCat = Object.keys(categories).sort((a,b) => categories[b] - categories[a])[0];
   if (topCat && categories[topCat] > (summary.expenses * 0.3)) {
-    return `الجزء الأكبر من أموالك ذهب إلى "${topCat}". تأكد أنه ضمن خطتك.`;
+    const catLabel = t((EXPENSE_CATEGORIES[topCat] || EXPENSE_CATEGORIES.other).label);
+    return (t('tip_high_spend') || `The largest part of your money went to "${catLabel}". Make sure it's within your plan.`).replace('__CAT__', catLabel);
   }
   
-  return "توزيع أموالك يبدو متوازناً. استمر في متابعة ميزانيتك!";
+  return t('tip_good') || "Your money distribution looks balanced. Keep tracking your budget!";
 }

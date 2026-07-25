@@ -11,6 +11,7 @@
  *  6. تعريض App للـ window (لنداءات onclick في HTML)
  */
 
+import { getLang, setLang, toggleLang, translatePage, t } from './core/i18n.js';
 import { applyGlobalDefaults }         from './charts/chartConfig.js';
 import { getSettings, saveSettings }   from './services/finance.js';
 import { exportData, importData }       from './services/backup.js';
@@ -26,6 +27,7 @@ import * as Toast                          from './ui/toast.js';
 import { filterTransactions,
          bindSearchInput,
          renderTransactions }          from './pages/transactions.js';
+import * as Notif                       from './services/notifications.js';
 
 // Pages
 import { renderDashboard }    from './pages/dashboard.js';
@@ -41,6 +43,9 @@ import { renderDebts,
 import { renderInvestments,
          openInvestmentModal,
          saveInvestment }     from './pages/investments.js';
+import { renderSubscriptions,
+         openSubscriptionModal,
+         saveSubscription }   from './pages/subscriptions.js';
 import { renderBudget,
          saveBudgetField }    from './pages/budget.js';
 import { renderAnalytics }    from './pages/analytics.js';
@@ -51,13 +56,14 @@ import * as Finance           from './services/finance.js';
    ════════════════════════════════════════ */
 function renderPage(page) {
   switch (page) {
-    case 'dashboard':    renderDashboard();                        break;
-    case 'income':       renderIncome();                           break;
-    case 'expenses':     renderExpenses();                         break;
-    case 'debts':        renderDebts();                            break;
-    case 'investments':  renderInvestments();                      break;
-    case 'budget':       renderBudget();  animateProgressBars();   break;
-    case 'analytics':    renderAnalytics(); animateProgressBars(); break;
+    case 'dashboard':     renderDashboard();                        break;
+    case 'income':        renderIncome();                           break;
+    case 'expenses':      renderExpenses();                         break;
+    case 'debts':         renderDebts();                            break;
+    case 'investments':   renderInvestments();                      break;
+    case 'subscriptions': renderSubscriptions();                    break;
+    case 'budget':        renderBudget();  animateProgressBars();   break;
+    case 'analytics':     renderAnalytics(); animateProgressBars(); break;
     case 'transactions': renderTransactions();                    break;
     case 'more':         /* static — no render */ syncMorePage();  break;
   }
@@ -95,10 +101,11 @@ function syncMorePage() {
 
 function handleDelete(type, id) {
   switch (type) {
-    case 'income':     Finance.deleteIncome(id);     break;
-    case 'expense':    Finance.deleteExpense(id);    break;
-    case 'debt':       Finance.deleteDebt(id);       break;
-    case 'investment': Finance.deleteInvestment(id); break;
+    case 'income':       Finance.deleteIncome(id);       break;
+    case 'expense':      Finance.deleteExpense(id);      break;
+    case 'debt':         Finance.deleteDebt(id);         break;
+    case 'investment':   Finance.deleteInvestment(id);   break;
+    case 'subscription': Finance.deleteSubscription(id); break;
   }
   Toast.show('تم الحذف', 'success');
   renderPage(getState().currentPage);
@@ -154,7 +161,13 @@ function bindMorePageEvents() {
     saveSettings({ theme: newTheme });
     applyTheme(newTheme);
     syncMorePage();
-    Toast.show('تم تغيير المظهر', 'info');
+    Toast.show(t('toast_theme'), 'info');
+  });
+
+  document.getElementById('moreLangBtn')?.addEventListener('click', () => {
+    const newLang = toggleLang();
+    Toast.show(t('toast_lang'));
+    renderPage(getState().currentPage);
   });
 
   // Export
@@ -192,6 +205,117 @@ function bindPWAInstall() {
 }
 
 /* ════════════════════════════════════════
+   Notification Page & Settings — وظائف نظام الإشعارات
+   ════════════════════════════════════════ */
+
+function refreshNotifUI() {
+  const count  = Notif.getUnreadCount();
+  const badge  = document.getElementById('notif-badge');
+  const list   = document.getElementById('notif-list');
+  const empty  = document.getElementById('notif-empty');
+  const notifs = Notif.getNotifications();
+
+  // تحديث شارة العدد
+  if (badge) {
+    badge.textContent    = count > 9 ? '9+' : count;
+    badge.style.display  = count > 0 ? 'block' : 'none';
+  }
+
+  // تحديث نافذة الإعدادات
+  const pushBtn = document.getElementById('togglePushBtn');
+  const status = Notif.getPermissionStatus();
+  if (pushBtn) {
+    if (status === 'granted') {
+      pushBtn.textContent = 'مفعل ✅';
+      pushBtn.classList.add('active');
+    } else if (status === 'denied') {
+      pushBtn.textContent = 'محظور ❌';
+      pushBtn.classList.remove('active');
+    } else {
+      pushBtn.textContent = 'تفعيل';
+      pushBtn.classList.remove('active');
+    }
+  }
+
+  // مزامنة حالة الأزرار (Toggles) مع الإعدادات
+  const settings = getSettings();
+  const toggleSmartBudget   = document.getElementById('toggleSmartBudget');
+  const toggleSmartDebts    = document.getElementById('toggleSmartDebts');
+  const toggleSmartInsights = document.getElementById('toggleSmartInsights');
+  const toggleWeeklySummary = document.getElementById('toggleWeeklySummary');
+  
+  if (toggleSmartBudget)   toggleSmartBudget.checked   = settings.notifSmartBudget   !== false;
+  if (toggleSmartDebts)    toggleSmartDebts.checked    = settings.notifSmartDebts    !== false;
+  if (toggleSmartInsights) toggleSmartInsights.checked = settings.notifSmartInsights !== false;
+  if (toggleWeeklySummary) toggleWeeklySummary.checked = settings.notifWeeklySummary !== false;
+
+  if (!list || !empty) return;
+
+  if (notifs.length === 0) {
+    list.innerHTML  = '';
+    empty.style.display = 'flex';
+  } else {
+    empty.style.display = 'none';
+    list.innerHTML = notifs.map(Notif.notifItemHTML).join('');
+  }
+}
+
+function bindNotifPage() {
+  document.getElementById('notifMarkAllBtn')?.addEventListener('click', () => {
+    Notif.markAllRead();
+    refreshNotifUI();
+  });
+  document.getElementById('notifClearBtn')?.addEventListener('click', () => {
+    Notif.clearNotifications();
+    refreshNotifUI();
+  });
+}
+/** عرض توست لطيف لطلب إذن الإشعارات (3 ثواني بعد الفتح) */
+function promptNotifPermission() {
+  if (Notif.wasPermissionAsked()) return;
+  if (Notif.getPermissionStatus() !== 'default') return;
+
+  setTimeout(() => {
+    const toast = document.createElement('div');
+    toast.className = 'notif-prompt-toast';
+    toast.style.cssText = `
+      position:fixed; bottom:80px; inset-inline-start:50%; transform:translateX(-50%);
+      background:var(--color-bg-card); border:1px solid var(--color-border);
+      border-radius:16px; padding:14px 18px; z-index:9999;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4); max-width:300px; width:90%;
+      animation:slideUp 0.3s var(--ease-out);
+    `;
+    toast.innerHTML = `
+      <div style="font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px">
+        ${t('notif_prompt_title')}
+      </div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">
+        ${t('notif_prompt_body')}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="notif-prompt-later" style="background:none;border:1px solid var(--color-border);color:var(--color-text-muted);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:12px">${t('notif_prompt_later')}</button>
+        <button id="notif-prompt-enable" style="background:var(--color-brand);border:none;color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:12px;font-weight:700">${t('notif_prompt_enable')}</button>
+      </div>
+    `;
+    document.body.appendChild(toast);
+
+    document.getElementById('notif-prompt-later')?.addEventListener('click', () => {
+      localStorage.setItem('mz_notif_permission_asked', '1');
+      toast.remove();
+    });
+    document.getElementById('notif-prompt-enable')?.addEventListener('click', async () => {
+      toast.remove();
+      const result = await Notif.requestNativePermission();
+      const msg = result === 'granted'
+        ? t('notif_permission_granted')
+        : t('notif_permission_denied');
+      Toast.show(msg, result === 'granted' ? 'success' : 'error');
+      refreshNotifUI();
+    });
+  }, 3500);
+}
+
+/* ════════════════════════════════════════
    App — واجهة عامة للـ onclick في HTML
    ════════════════════════════════════════ */
 /* ── حماية double-submit ── */
@@ -211,10 +335,12 @@ export const App = {
   navigateTo: (page) => navigateTo(page, renderPage),
 
   // Modals
-  openIncomeModal:     (id) => { setState({ editingId: id || null }); openIncomeModal(id); },
-  openExpenseModal:    (id) => { setState({ editingId: id || null }); openExpenseModal(id); },
-  openDebtModal:       (id) => { setState({ editingId: id || null }); openDebtModal(id); },
-  openInvestmentModal: (id) => { setState({ editingId: id || null }); openInvestmentModal(id); },
+  openIncomeModal:     (id) => { setState({ editingId: id || null }); openIncomeModal(id); openModal('incomeModal'); },
+  openExpenseModal:    (id) => { setState({ editingId: id || null }); openExpenseModal(id); openModal('expenseModal'); },
+  openDebtModal:       (id) => { setState({ editingId: id || null }); openDebtModal(id); openModal('debtModal'); },
+  openInvestmentModal: (id) => { setState({ editingId: id || null }); openInvestmentModal(id); openModal('investmentModal'); },
+  openSubscriptionModal: (id) => { setState({ editingId: id || null }); openSubscriptionModal(id); openModal('subscriptionModal'); },
+  openModal,
   closeModal,
 
   // Save — محمية من double-submit
@@ -222,6 +348,7 @@ export const App = {
   saveExpense:    withSaveGuard(() => saveExpense(getState().editingId,    () => { closeModal(); renderPage(getState().currentPage); })),
   saveDebt:       withSaveGuard(() => saveDebt(getState().editingId,       () => { closeModal(); renderPage(getState().currentPage); })),
   saveInvestment: withSaveGuard(() => saveInvestment(getState().editingId, () => { closeModal(); renderPage(getState().currentPage); })),
+  saveSubscription: withSaveGuard(() => saveSubscription(getState().editingId, () => { closeModal(); renderPage(getState().currentPage); })),
 
   // Delete
   confirmDelete:  (type, id) => openConfirm(type, id),
@@ -237,7 +364,7 @@ export const App = {
     const newTheme = current === 'dark' ? 'light' : 'dark';
     saveSettings({ theme: newTheme });
     applyTheme(newTheme);
-    Toast.show('تم تغيير المظهر', 'info');
+    Toast.show(t('toast_theme'), 'info');
   },
 
   // Print
@@ -245,6 +372,43 @@ export const App = {
 
   // Export/Import
   exportData,
+
+  // Notifications
+  async togglePushNotifications() {
+    const current = Notif.getPermissionStatus();
+    if (current === 'granted') {
+      Toast.show('الإشعارات مفعلة بالفعل', 'success');
+    } else if (current === 'denied') {
+      Toast.show('الرجاء السماح بالإشعارات من إعدادات المتصفح', 'error');
+    } else {
+      const result = await Notif.requestNativePermission();
+      Toast.show(result === 'granted' ? 'تم التفعيل بنجاح' : 'تم الرفض', result === 'granted' ? 'success' : 'error');
+    }
+    refreshNotifUI();
+  },
+  saveNotifSettings() {
+    const smartBudget   = document.getElementById('toggleSmartBudget')?.checked;
+    const smartDebts    = document.getElementById('toggleSmartDebts')?.checked;
+    const smartInsights = document.getElementById('toggleSmartInsights')?.checked;
+    const weeklySummary = document.getElementById('toggleWeeklySummary')?.checked;
+
+    saveSettings({
+      notifSmartBudget:   smartBudget,
+      notifSmartDebts:    smartDebts,
+      notifSmartInsights: smartInsights,
+      notifWeeklySummary: weeklySummary,
+    });
+    Toast.show('تم حفظ إعدادات الإشعارات', 'success');
+  },
+  openNotif(id, link) {
+    Notif.markRead(id);
+    refreshNotifUI();
+    if (link) navigateTo(link, renderPage);
+  },
+  deleteNotif(id) {
+    Notif.deleteNotification(id);
+    refreshNotifUI();
+  },
 };
 
 /* ════════════════════════════════════════
@@ -257,6 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 5000);
 
   try {
+    // 0. Language
+    translatePage();
+
     // 1. Chart.js defaults
     applyGlobalDefaults();
 
@@ -296,6 +463,23 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.add('active');
       filterTransactions(type);
     };
+
+    // 12. Notifications
+    bindNotifPage();
+    refreshNotifUI();
+    promptNotifPermission();
+    // تشغيل المحرك الذكي (2 ثانية بعد تحميل التطبيق)
+    setTimeout(async () => {
+      await Notif.runSmartTriggers();
+      refreshNotifUI();
+    }, 2000);
+
+    // 13. استماع للتنقل من إشعارات الخلفية
+    navigator.serviceWorker?.addEventListener('message', (event) => {
+      if (event.data?.type === 'NAVIGATE_TO' && event.data.page) {
+        navigateTo(event.data.page, renderPage);
+      }
+    });
 
     console.log(
       '%cميزانيتي v1.0',

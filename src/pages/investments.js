@@ -2,6 +2,7 @@
  * @module pages/investments
  */
 import { formatCurrency }                        from '../core/utils.js';
+import { t } from '../core/i18n.js';
 import * as Finance                              from '../services/finance.js';
 import { investmentCardHTML, emptyStateHTML }    from '../ui/components.js';
 import { openModal }                             from '../ui/modal.js';
@@ -60,7 +61,7 @@ export function saveInvestment(editingId, onDone) {
   const startDate = document.getElementById('inv-start')?.value || '';
 
   if (!name)                         return Toast.show('أدخل اسم الاستثمار', 'error');
-  if (name.length > 100)             return Toast.show('الاسم طويل جداً', 'error');
+  if (name.length > 100)             return Toast.show(t('toast_invalid'), 'error');
   if (!capitalEl?.value.trim())      return Toast.show('أدخل رأس المال', 'error');
   if (isNaN(capital) || capital <= 0) return Toast.show('رأس المال يجب أن يكون رقماً موجباً', 'error');
   if (capital > 999_999_999)         return Toast.show('القيمة كبيرة جداً', 'error');

@@ -5,6 +5,7 @@ import { getState }           from '../core/state.js';
 import { formatCurrency, svgIcon } from '../core/utils.js';
 import { BUDGET_CATEGORIES }  from '../core/constants.js';
 import * as Finance           from '../services/finance.js';
+import { t }                  from '../core/i18n.js';
 
 export function renderBudget() {
   const { filterMonth: m, filterYear: y } = getState();
@@ -17,7 +18,7 @@ export function renderBudget() {
     inputsContainer.innerHTML = BUDGET_CATEGORIES.map(cat => `
       <div class="budget-input-row">
         <span class="budget-input-icon">${svgIcon(cat.iconId)}</span>
-        <span class="budget-input-label">${cat.label}</span>
+        <span class="budget-input-label">${t(cat.label)}</span>
         <input type="number" class="budget-input-field" id="budget-${cat.key}"
           value="${budget[cat.key] || ''}" placeholder="0"
           onchange="App.saveBudgetField('${cat.key}', this.value)" min="0" step="50">
@@ -44,7 +45,7 @@ export function renderBudget() {
           <div class="budget-category-header">
             <div class="budget-category-name">
               <span class="budget-category-icon">${svgIcon(cat.iconId)}</span>
-              ${cat.label}
+              ${t(cat.label)}
             </div>
             <div class="budget-category-amounts">
               ${budgeted > 0

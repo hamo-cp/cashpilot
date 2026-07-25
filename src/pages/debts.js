@@ -2,6 +2,7 @@
  * @module pages/debts
  */
 import { formatCurrency }              from '../core/utils.js';
+import { t } from '../core/i18n.js';
 import * as Finance                    from '../services/finance.js';
 import { debtCardHTML, emptyStateHTML } from '../ui/components.js';
 import { openModal }                   from '../ui/modal.js';
@@ -52,12 +53,12 @@ export function saveDebt(editingId, onDone) {
   const notes    = document.getElementById('debt-notes')?.value.trim() || '';
 
   if (!creditor)                     return Toast.show('أدخل اسم الدائن', 'error');
-  if (creditor.length > 100)         return Toast.show('الاسم طويل جداً', 'error');
+  if (creditor.length > 100)         return Toast.show(t('toast_invalid'), 'error');
   if (!amountEl?.value.trim())       return Toast.show('أدخل قيمة الدين', 'error');
   if (isNaN(amount) || amount <= 0)  return Toast.show('قيمة الدين يجب أن تكون رقماً موجباً', 'error');
   if (amount > 999_999_999)          return Toast.show('القيمة كبيرة جداً', 'error');
-  if (paid < 0)                      return Toast.show('المبلغ المدفوع لا يمكن أن يكون سالباً', 'error');
-  if (paid > amount)                 return Toast.show('المبلغ المدفوع لا يمكن أن يتجاوز إجمالي الدين', 'error');
+  if (paid < 0)                      return Toast.show(t('toast_invalid'), 'error');
+  if (paid > amount)                 return Toast.show(t('toast_invalid'), 'error');
 
   const data = { creditor, amount, paid, dueDate, notes };
 

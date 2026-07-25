@@ -2,6 +2,7 @@
  * @module pages/expenses
  */
 import { getState }                        from '../core/state.js';
+import { t } from '../core/i18n.js';
 import { formatCurrency, matchPeriod }     from '../core/utils.js';
 import * as Finance                        from '../services/finance.js';
 import { expenseItemHTML, emptyStateHTML, categorySummaryHTML } from '../ui/components.js';
@@ -74,10 +75,10 @@ export function saveExpense(editingId, onDone) {
   const notes    = document.getElementById('exp-notes')?.value.trim() || '';
 
   if (!name)                        return Toast.show('أدخل اسم المصروف', 'error');
-  if (name.length > 100)            return Toast.show('الاسم طويل جداً (100 حرف كحد أقصى)', 'error');
+  if (name.length > 100)            return Toast.show(t('toast_invalid'), 'error');
   if (!amountEl?.value.trim())      return Toast.show('أدخل المبلغ', 'error');
   if (isNaN(amount) || amount <= 0) return Toast.show('المبلغ يجب أن يكون رقماً موجباً', 'error');
-  if (amount > 999_999_999)         return Toast.show('المبلغ كبير جداً', 'error');
+  if (amount > 999_999_999)         return Toast.show(t('toast_invalid'), 'error');
   if (!date)                        return Toast.show('أدخل التاريخ', 'error');
 
   const data = { name, amount, category, date, notes };

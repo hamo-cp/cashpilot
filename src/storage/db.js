@@ -8,9 +8,10 @@ export const KEYS = Object.freeze({
   INCOME:      'mz_income',
   EXPENSES:    'mz_expenses',
   DEBTS:       'mz_debts',
-  INVESTMENTS: 'mz_investments',
-  BUDGET:      'mz_budget',
-  SETTINGS:    'mz_settings',
+  INVESTMENTS:   'mz_investments',
+  SUBSCRIPTIONS: 'mz_subscriptions',
+  BUDGET:        'mz_budget',
+  SETTINGS:      'mz_settings',
 });
 
 /** قراءة قيمة واحدة */

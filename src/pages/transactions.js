@@ -2,6 +2,7 @@
  * @module pages/transactions
  */
 import { getState, setState }        from '../core/state.js';
+import { t } from '../core/i18n.js';
 import { formatDate }                from '../core/utils.js';
 import * as Finance                  from '../services/finance.js';
 import { txItemHTML, emptyStateHTML } from '../ui/components.js';
@@ -12,13 +13,13 @@ export function renderTransactions() {
   const { filterMonth: m, filterYear: y, searchQuery } = getState();
   const all = Finance.searchTransactions(searchQuery, m, y);
 
-  set('tx-count', all.length + ' معاملة');
+  set('tx-count', all.length + ' ' + t('nav_transactions'));
 
   const container = document.getElementById('transactions-list');
   if (!container) return;
 
   if (!all.length) {
-    container.innerHTML = emptyStateHTML('ic-search', 'لا توجد نتائج', 'جرب تغيير الفلتر أو مصطلح البحث');
+    container.innerHTML = emptyStateHTML('ic-search', t('empty_tx'), 'جرب تغيير الفلتر أو مصطلح البحث');
     return;
   }
 
@@ -55,13 +56,13 @@ export function filterTransactions(type) {
   if (!container) return;
 
   if (!all.length) {
-    container.innerHTML = emptyStateHTML('ic-search', 'لا توجد نتائج', 'جرب فلتراً مختلفاً');
+    container.innerHTML = emptyStateHTML('ic-search', t('empty_tx'), 'جرب فلتراً مختلفاً');
   } else {
     container.innerHTML = all.map(txItemHTML).join('');
   }
 
   const countEl = document.getElementById('tx-count');
-  if (countEl) countEl.textContent = all.length + ' معاملة';
+  if (countEl) countEl.textContent = all.length + ' ' + t('nav_transactions');
 }
 
 /** ربط حقل البحث */

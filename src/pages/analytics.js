@@ -2,6 +2,7 @@
  * @module pages/analytics
  */
 import { getState }                          from '../core/state.js';
+import { t } from '../core/i18n.js';
 import { formatCurrency, formatPercent, animateValue } from '../core/utils.js';
 import * as Finance                          from '../services/finance.js';
 import { renderLineChart, renderCategoryChart } from '../charts/charts.js';
@@ -26,13 +27,13 @@ export function renderAnalytics() {
     }, 100);
 
     let color = 'var(--color-positive)';
-    let text = 'حالة مالية ممتازة 🌟';
+    let text = t('health_excellent');
     if (score < 50) {
        color = 'var(--color-negative)';
-       text = 'حالة حرجة - تحتاج لتقليل النفقات ⚠️';
+       text = t('health_critical');
     } else if (score < 80) {
        color = 'var(--color-warning)';
-       text = 'حالة جيدة - يمكن تحسين المدخرات 👍';
+       text = t('health_good');
     }
     
     scoreEl.style.color = color;
@@ -42,49 +43,49 @@ export function renderAnalytics() {
 
   const rows = [
     {
-      label: 'إجمالي الدخل',
+      label: t('stat_total_inc'),
       numValue: summary.income,
       formatFn: formatCurrency,
       pct:   100,
       color: 'positive',
     },
     {
-      label: 'إجمالي المصروفات',
+      label: t('stat_total_exp'),
       numValue: summary.expenses,
       formatFn: formatCurrency,
       pct:   summary.spendRate,
       color: 'negative',
     },
     {
-      label: 'صافي الرصيد',
+      label: t('stat_net'),
       numValue: summary.net,
       formatFn: formatCurrency,
       pct:   Math.max(0, summary.savingRate),
       color: summary.net >= 0 ? 'positive' : 'negative',
     },
     {
-      label: 'إجمالي الديون',
+      label: t('stat_total_debts'),
       numValue: summary.debts,
       formatFn: formatCurrency,
       pct:   summary.income > 0 ? Math.min(100, summary.debts / summary.income * 100) : 0,
       color: 'negative',
     },
     {
-      label: 'إجمالي الاستثمارات',
+      label: t('stat_total_inv'),
       numValue: summary.investments,
       formatFn: formatCurrency,
       pct:   summary.income > 0 ? Math.min(100, summary.investments / summary.income * 100) : 0,
       color: 'brand',
     },
     {
-      label: 'نسبة الادخار',
+      label: t('stat_saving_rate'),
       numValue: summary.savingRate,
       formatFn: formatPercent,
       pct:   Math.max(0, summary.savingRate),
       color: 'positive',
     },
     {
-      label: 'الالتزام بالميزانية',
+      label: t('stat_budget_commitment'),
       numValue: 100 - summary.budgetRate,
       formatFn: formatPercent,
       pct:   Math.max(0, 100 - summary.budgetRate),
@@ -106,7 +107,7 @@ export function renderAnalytics() {
             <div class="progress-bar"
                  style="background: var(--color-${row.color}); width:0; transition: width 1s var(--ease-out) ${0.1 * i}s; width:${Math.min(100, row.pct).toFixed(0)}%"></div>
           </div>
-          <div style="font-size:10px;color:var(--color-text-muted);text-align:center;margin-top:3px">
+          <div class="analytics-pct" style="font-size:10px;color:var(--color-text-muted);text-align:center;margin-top:3px">
             ${row.pct.toFixed(0)}%
           </div>
         </div>

@@ -3,6 +3,7 @@
  * @description دوال مساعدة مشتركة — تنسيق، تواريخ، معرّفات.
  * لا تعتمد على أي وحدة أخرى في المشروع.
  */
+import { getLang, t } from './i18n.js';
 
 /** توليد معرف فريد */
 export function uid() {
@@ -12,10 +13,11 @@ export function uid() {
 /** تنسيق العملة بالجنيه المصري */
 export function formatCurrency(amount, decimals = 0) {
   const num = parseFloat(amount) || 0;
-  return num.toLocaleString('ar-EG', {
+  const locale = getLang() === 'ar' ? 'ar-EG' : 'en-US';
+  return num.toLocaleString(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }) + ' ج.م';
+  }) + ' ' + t('currency');
 }
 
 /** تنسيق النسبة المئوية */
@@ -28,7 +30,8 @@ export function formatPercent(value) {
 export function formatDate(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('ar-EG', {
+  const locale = getLang() === 'ar' ? 'ar-EG' : 'en-US';
+  return d.toLocaleDateString(locale, {
     day: 'numeric', month: 'short', year: 'numeric',
   });
 }

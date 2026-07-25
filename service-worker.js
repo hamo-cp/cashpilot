@@ -3,7 +3,7 @@
    يتيح العمل الكامل بدون اتصال إنترنت
    ============================================================ */
 
-const CACHE_NAME = 'cashpilot-v4.3';
+const CACHE_NAME = 'cashpilot-v5.0';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -36,6 +36,7 @@ const STATIC_ASSETS = [
   './src/pages/budget.js',
   './src/pages/analytics.js',
   './src/pages/transactions.js',
+  './src/services/notifications.js',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap'
 ];
@@ -116,4 +117,38 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({ version: CACHE_NAME });
   }
+  // إرسال إشعار أصلي من خلال الـ Service Worker
+  if (event.data && event.data.type === 'SEND_NOTIFICATION') {
+    const { title, body, tag, link } = event.data;
+    self.registration.showNotification(title, {
+      body:    body || '',
+      icon:    './files/icon-192.png',
+      badge:   './files/icon-192-maskable.png',
+      tag:     tag  || 'cashpilot-notif',
+      data:    { link: link || null },
+      vibrate: [200, 100, 200],
+      requireInteraction: false,
+    }).catch(err => console.warn('[SW] showNotification failed:', err));
+  }
+});
+
+/* ── عند النقر على الإشعار من شريط الإشعارات ── */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetLink = event.notification.data?.link || null;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      // إذا كان التطبيق مفتوحاً → أعد التركيز عليه
+      for (const client of clientList) {
+        if (client.url.includes('index.html') || client.url.endsWith('/')) {
+          client.focus();
+          if (targetLink) client.postMessage({ type: 'NAVIGATE_TO', page: targetLink });
+          return;
+        }
+      }
+      // إذا لم يكن مفتوحاً → افتح نافذة جديدة
+      return clients.openWindow('./' + (targetLink ? '#' + targetLink : ''));
+    })
+  );
 });

@@ -54,11 +54,11 @@ export function incomeItemHTML(item) {
       <div class="transaction-amount income">${formatCurrency(item.amount)}</div>
       <div class="transaction-actions">
         <button class="btn btn-ghost btn-icon btn-sm"
-                onclick="App.openIncomeModal('${item.id}')" title="تعديل">
+                onclick="App.openIncomeModal('${item.id}')" title="${t('edit')}">
           ${svgIcon('ic-edit')}
         </button>
         <button class="btn btn-danger btn-icon btn-sm"
-                onclick="App.confirmDelete('income','${item.id}')" title="حذف">
+                onclick="App.confirmDelete('income','${item.id}')" title="${t('delete')}">
           ${svgIcon('ic-trash')}
         </button>
       </div>
@@ -80,11 +80,11 @@ export function expenseItemHTML(item) {
       <div class="transaction-amount expense">−${formatCurrency(item.amount)}</div>
       <div class="transaction-actions">
         <button class="btn btn-ghost btn-icon btn-sm"
-                onclick="App.openExpenseModal('${item.id}')" title="تعديل">
+                onclick="App.openExpenseModal('${item.id}')" title="${t('edit')}">
           ${svgIcon('ic-edit')}
         </button>
         <button class="btn btn-danger btn-icon btn-sm"
-                onclick="App.confirmDelete('expense','${item.id}')" title="حذف">
+                onclick="App.confirmDelete('expense','${item.id}')" title="${t('delete')}">
           ${svgIcon('ic-trash')}
         </button>
       </div>
@@ -129,11 +129,11 @@ export function debtCardHTML(debt) {
           ${statusBadge}
           <div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
             <button class="btn btn-ghost btn-icon btn-sm"
-                    onclick="App.openDebtModal('${debt.id}')" title="تعديل">
+                    onclick="App.openDebtModal('${debt.id}')" title="${t('edit')}">
               ${svgIcon('ic-edit')}
             </button>
             <button class="btn btn-danger btn-icon btn-sm"
-                    onclick="App.confirmDelete('debt','${debt.id}')" title="حذف">
+                    onclick="App.confirmDelete('debt','${debt.id}')" title="${t('delete')}">
               ${svgIcon('ic-trash')}
             </button>
           </div>
@@ -141,19 +141,19 @@ export function debtCardHTML(debt) {
       </div>
       <div class="debt-amounts">
         <div class="debt-amount-item">
-          <div class="debt-amount-label">إجمالي الدين</div>
+          <div class="debt-amount-label">${t('comp_debt_total')}</div>
           <div class="debt-amount-value" style="color:var(--color-negative)">${formatCurrency(amount)}</div>
         </div>
         <div class="debt-amount-item">
-          <div class="debt-amount-label">المبلغ المتبقي</div>
+          <div class="debt-amount-label">${t('comp_debt_rem')}</div>
           <div class="debt-amount-value" style="color:var(--color-warning)">${formatCurrency(remaining)}</div>
         </div>
         <div class="debt-amount-item">
-          <div class="debt-amount-label">المدفوع</div>
+          <div class="debt-amount-label">${t('comp_debt_paid')}</div>
           <div class="debt-amount-value" style="color:var(--color-positive)">${formatCurrency(paid)}</div>
         </div>
         <div class="debt-amount-item">
-          <div class="debt-amount-label">نسبة السداد</div>
+          <div class="debt-amount-label">${t('comp_debt_ratio')}</div>
           <div class="debt-amount-value" style="color:var(--color-brand)">${formatPercent(paidPct)}</div>
         </div>
       </div>
@@ -190,18 +190,18 @@ export function investmentCardHTML(inv) {
       </div>
       <div class="investment-details">
         <div class="investment-detail">
-          <div class="investment-detail-label">رأس المال</div>
+          <div class="investment-detail-label">${t('comp_capital')}</div>
           <div class="investment-detail-value" style="color:var(--color-brand)">${formatCurrency(inv.capital)}</div>
         </div>
         <div class="investment-detail">
-          <div class="investment-detail-label">الأرباح</div>
+          <div class="investment-detail-label">${t('comp_profits')}</div>
           <div class="investment-detail-value"
                style="color:${profit >= 0 ? 'var(--color-positive)' : 'var(--color-negative)'}">
             ${formatCurrency(profit)}
           </div>
         </div>
         <div class="investment-detail">
-          <div class="investment-detail-label">الإجمالي</div>
+          <div class="investment-detail-label">${t('comp_total')}</div>
           <div class="investment-detail-value" style="color:var(--color-warning)">
             ${formatCurrency((parseFloat(inv.capital) || 0) + profit)}
           </div>
@@ -209,10 +209,10 @@ export function investmentCardHTML(inv) {
       </div>
       <div style="display:flex;gap:6px;margin-top:12px;justify-content:flex-end">
         <button class="btn btn-ghost btn-sm" onclick="App.openInvestmentModal('${inv.id}')">
-          ${svgIcon('ic-edit')} تعديل
+          ${svgIcon('ic-edit')} ${t('edit')}
         </button>
         <button class="btn btn-danger btn-sm" onclick="App.confirmDelete('investment','${inv.id}')">
-          ${svgIcon('ic-trash')} حذف
+          ${svgIcon('ic-trash')} ${t('delete')}
         </button>
       </div>
     </div>`;
@@ -241,7 +241,7 @@ export function categorySummaryHTML(cat, amt, pct) {
           <span class="budget-category-icon" style="color:var(--color-${ck})">${svgIcon(info.iconId)}</span>
           ${info.label}
         </div>
-        <div style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--color-${ck})">
+        <div class="budget-category-amount" style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--color-${ck})">
           ${formatCurrency(amt)}
         </div>
       </div>
