@@ -373,8 +373,8 @@ export const App = {
 
       resultDiv.innerHTML = html;
     } catch (err) {
-      resultDiv.innerHTML = '<div style="color:var(--color-danger);">حدث خطأ أثناء الاتصال بالخادم الذكي. حاول مجدداً لاحقاً.</div>';
-      Toast.show('خطأ في الاتصال بالذكاء الاصطناعي', 'error');
+      resultDiv.innerHTML = `<div style="color:var(--color-danger);">سبب الخطأ: ${err.message}</div>`;
+      Toast.show('خطأ في الاتصال', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = 'اطلب نصيحة';

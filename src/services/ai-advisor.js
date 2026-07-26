@@ -60,9 +60,9 @@ export async function generateInsights() {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({ error: 'API_ERROR' }));
       console.error('[AI] Proxy API Error:', errorData);
-      throw new Error('API_ERROR');
+      throw new Error(errorData.error || 'API_ERROR');
     }
 
     const data = await response.json();
@@ -73,6 +73,6 @@ export async function generateInsights() {
     
   } catch (err) {
     console.error('[AI] Failed to generate insights:', err);
-    throw new Error('NETWORK_ERROR');
+    throw err;
   }
 }
