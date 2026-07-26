@@ -39,7 +39,13 @@ export async function onRequestPost(context) {
     if (!geminiResponse.ok) {
       const errorData = await geminiResponse.json();
       console.error('[API] Gemini API Error:', errorData);
-      return new Response(JSON.stringify({ error: 'Failed to fetch insights from AI provider' }), {
+      
+      let errorMessage = 'Failed to fetch insights from AI provider';
+      if (errorData.error && errorData.error.message) {
+        errorMessage = `Gemini Error: ${errorData.error.message}`;
+      }
+      
+      return new Response(JSON.stringify({ error: errorMessage }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' }
       });
