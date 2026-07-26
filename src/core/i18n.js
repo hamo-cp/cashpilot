@@ -159,6 +159,13 @@ const DICTIONARY = {
     toast_theme: 'تم تغيير المظهر',
     toast_invalid: 'يرجى إدخال بيانات صحيحة',
 
+    // AI Advisor
+    ai_advisor_title: 'المستشار المالي الذكي',
+    ai_advisor_desc: 'تكوين ذكاء Gemini الاصطناعي',
+    ai_generate_btn: 'اطلب نصيحة',
+    ai_generating: 'جاري التحليل',
+    ai_error_conn: 'حدث خطأ أثناء الاتصال بالخادم. تأكد من صحة المفتاح.',
+
     // Modals & Labels
     label_category: 'الفئة',
     label_notes: 'ملاحظات',
@@ -370,6 +377,17 @@ const DICTIONARY = {
     toast_lang: 'Language changed to English',
     toast_theme: 'Theme changed',
     toast_invalid: 'Please enter valid data',
+
+    // AI Advisor
+    ai_advisor_title: 'AI Financial Advisor',
+    ai_advisor_desc: 'Configure Gemini AI',
+    ai_generate_btn: 'Generate Insights',
+    ai_generating: 'Analyzing',
+    ai_settings_title: '🤖 AI Advisor Settings',
+    ai_settings_privacy: 'For your privacy, we don\'t send data to our servers. Please enter your <strong>Google Gemini API Key</strong>.',
+    ai_save_key: 'Save Key',
+    ai_get_key: 'Get a free key here',
+    ai_error_conn: 'Connection error. Check your API key.',
 
     // Modals & Labels
     label_category: 'Category',

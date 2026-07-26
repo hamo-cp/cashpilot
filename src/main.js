@@ -28,6 +28,7 @@ import { filterTransactions,
          bindSearchInput,
          renderTransactions }          from './pages/transactions.js';
 import * as Notif                       from './services/notifications.js';
+import { generateInsights }             from './services/ai-advisor.js';
 
 // Pages
 import { renderDashboard }    from './pages/dashboard.js';
@@ -350,6 +351,35 @@ export const App = {
   openSubscriptionModal: (id) => { setState({ editingId: id || null }); openSubscriptionModal(id); openModal('subscriptionModal'); },
   openModal,
   closeModal,
+  // AI Advisor
+  generateAIInsights: async () => {
+    const btn = document.getElementById('aiGenerateBtn');
+    const resultDiv = document.getElementById('aiInsightsResult');
+    if (!btn || !resultDiv) return;
+
+    try {
+      btn.disabled = true;
+      btn.innerHTML = 'جاري التحليل <svg class="icon icon-sm spin"><use href="#ic-refresh"/></svg>';
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<div style="text-align:center; padding:10px;">جاري التواصل مع الذكاء الاصطناعي...</div>';
+
+      const insights = await generateInsights();
+      
+      // Simple markdown parser for **bold** and \n lists
+      const html = insights
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+
+      resultDiv.innerHTML = html;
+    } catch (err) {
+      resultDiv.innerHTML = '<div style="color:var(--color-danger);">حدث خطأ أثناء الاتصال بالخادم الذكي. حاول مجدداً لاحقاً.</div>';
+      Toast.show('خطأ في الاتصال بالذكاء الاصطناعي', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'اطلب نصيحة';
+    }
+  },
 
   // Save — محمية من double-submit
   saveIncome:     withSaveGuard(() => saveIncome(getState().editingId,     () => { closeModal(); renderPage(getState().currentPage); })),

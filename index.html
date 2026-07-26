@@ -528,6 +528,22 @@
       </div>
     </div>
 
+    <!-- AI Advisor Card (New) -->
+    <div class="card glass-card mb-16 fade-in" style="background: linear-gradient(145deg, var(--color-bg-card), rgba(255,193,7,0.05)); border: 1px solid rgba(255,193,7,0.2);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="background:rgba(255,193,7,0.15); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;">🤖</div>
+          <div style="font-size:14px; font-weight:700; color:var(--color-text-primary);" data-i18n="ai_advisor_title">المستشار المالي الذكي</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="App.generateAIInsights()" id="aiGenerateBtn">
+          اطلب نصيحة
+        </button>
+      </div>
+      <div id="aiInsightsResult" style="display:none; font-size:13px; color:var(--color-text-secondary); line-height:1.6; border-top:1px solid var(--color-border); padding-top:12px; margin-top:8px;">
+        <!-- AI Results will appear here -->
+      </div>
+    </div>
+
     <!-- Financial Health Score (New) -->
     <div class="card glass-card mb-16 fade-in stagger-1" style="text-align: center; padding: 24px;">
       <div style="font-size: 13px; color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 12px;" data-i18n="stat_health">مؤشر الصحة المالية</div>
@@ -836,9 +852,9 @@
 
 <!-- FAB removed — center nav button used instead -->
 
-<!-- ════════════════════════════════════════
-     نافذة الدخل
-════════════════════════════════════════ -->
+<!-- ========================================
+     إضافة دخل
+======================================== -->
 <div id="incomeModal" class="modal-overlay">
   <div class="modal">
     <div class="modal-handle"></div>
