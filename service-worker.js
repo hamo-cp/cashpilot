@@ -3,7 +3,7 @@
    يتيح العمل الكامل بدون اتصال إنترنت
    ============================================================ */
 
-const CACHE_NAME = 'cashpilot-v7.0';
+const CACHE_NAME = 'cashpilot-v7.1';
 const STATIC_ASSETS = [
   './',
   './index.html',
