@@ -630,9 +630,10 @@ test('service worker precaches the active import closure and no external executa
   assert.equal(serviceWorker.includes("mode: 'no-cors'"), false);
 });
 
-test('vendored chart bytes match the recorded reviewed digest', () => {
-  const chart = readFileSync(join(root, 'vendor/chart.js-4.4.0/chart.umd.js'));
-  const digest = createHash('sha256').update(chart).digest('hex');
+test('vendored chart content matches the reviewed digest across line endings', () => {
+  const chart = readFileSync(join(root, 'vendor/chart.js-4.4.0/chart.umd.js'), 'utf8')
+    .replace(/\r\n?/g, '\n');
+  const digest = createHash('sha256').update(chart, 'utf8').digest('hex');
   assert.equal(digest, '321e3a3fa98da4aaa957d10be57cbb514de0989eed8f9d726b5d05902cd01904');
   assert.ok(existsSync(join(root, 'vendor/chart.js-4.4.0/LICENSE.md')));
 });
