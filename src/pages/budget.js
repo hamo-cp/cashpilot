@@ -5,7 +5,7 @@ import { getState }           from '../core/state.js';
 import { formatCurrency, svgIcon } from '../core/utils.js';
 import { BUDGET_CATEGORIES }  from '../core/constants.js';
 import * as Finance           from '../services/finance.js';
-import { t }                  from '../core/i18n.js';
+import { t, tf }              from '../core/i18n.js';
 
 export function renderBudget() {
   const { filterMonth: m, filterYear: y } = getState();
@@ -20,9 +20,13 @@ export function renderBudget() {
         <span class="budget-input-icon">${svgIcon(cat.iconId)}</span>
         <span class="budget-input-label">${t(cat.label)}</span>
         <input type="number" class="budget-input-field" id="budget-${cat.key}"
-          value="${budget[cat.key] || ''}" placeholder="0"
-          onchange="App.saveBudgetField('${cat.key}', this.value)" min="0" step="50">
+          data-budget-key="${cat.key}" placeholder="0" min="0" step="50">
       </div>`).join('');
+    inputsContainer.querySelectorAll('[data-budget-key]').forEach(input => {
+      const key = input.dataset.budgetKey;
+      input.value = budget[key] || '';
+      input.addEventListener('change', () => saveBudgetField(key, input.value, () => renderBudget()));
+    });
   }
 
   // تقرير التقدم
@@ -50,7 +54,7 @@ export function renderBudget() {
             <div class="budget-category-amounts">
               ${budgeted > 0
                 ? `<strong style="color:var(--color-brand)">${formatCurrency(spent)}</strong> / ${formatCurrency(budgeted)}`
-                : `<span style="color:var(--color-text-muted)">لم تُحدد ميزانية</span>`}
+                : `<span style="color:var(--color-text-muted)">${t('budget_not_set')}</span>`}
             </div>
           </div>
           ${budgeted > 0 ? `
@@ -58,11 +62,11 @@ export function renderBudget() {
             <div class="progress-bar progress-${barColor}" style="width:${pct.toFixed(0)}%"></div>
           </div>
           <div class="budget-status">
-            <span>${pct.toFixed(0)}% مستخدم</span>
+            <span>${pct.toFixed(0)}% ${t('budget_used')}</span>
             <span style="color:${remainColor}">
               ${remaining >= 0
-                ? 'متبقي ' + formatCurrency(remaining)
-                : 'تجاوزت بـ ' + formatCurrency(Math.abs(remaining))}
+                ? tf('budget_remaining_value', { amount: formatCurrency(remaining) })
+                : tf('budget_over_by', { amount: formatCurrency(Math.abs(remaining)) })}
             </span>
           </div>` : ''}
         </div>`;

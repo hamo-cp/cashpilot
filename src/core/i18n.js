@@ -28,6 +28,38 @@ const DICTIONARY = {
     inv_crypto: 'عملات رقمية',
     inv_savings: 'توفير',
     inv_other: 'أخرى',
+    inv_total_capital_label: 'إجمالي رأس المال',
+    inv_total_profit_label: 'إجمالي الأرباح',
+    inv_count_label: 'عدد الاستثمارات',
+    inv_form_title: 'إضافة استثمار',
+    inv_name_label: 'اسم الاستثمار *',
+    inv_name_placeholder: 'مثال: أسهم CIB، ذهب 21...',
+    inv_type_label: 'نوع الاستثمار',
+    inv_start_label: 'تاريخ البداية',
+    inv_capital_label: 'تكلفة الشراء (ج.م) *',
+    inv_quantity_label: 'الكمية (جرام/سهم)',
+    inv_quantity_placeholder: 'اختياري للذهب والأسهم',
+    inv_profit_label: 'الأرباح اليدوية (إن وجدت)',
+    inv_profit_placeholder: 'يتم حسابها تلقائياً إذا أدخلت الكمية',
+    investment_return: 'العائد',
+    unit_investment: 'استثمار',
+    unit_share: 'سهم',
+    unit_gram: 'جرام',
+    market_error: 'فشل في جلب الأسعار ⚠️',
+    market_updated: 'آخر تحديث',
+    market_stale: 'بيانات مخزنة',
+    market_refresh: 'تحديث ↻',
+    market_gold_24: '🥇 ذهب عيار 24',
+    market_gold_21: '🥇 ذهب عيار 21',
+    market_silver: '🥈 الفضة',
+    market_usd: '💵 الدولار',
+    market_per_gram: 'ج.م/جرام',
+    market_partial: 'بعض أسعار الأسهم غير متاحة حاليًا: {symbols}',
+    market_quote_cached: 'سعر مخزن',
+    market_quote_cached_at: 'سعر مخزن: {time}',
+    market_holding_cached: 'التقييم يستخدم آخر سعر مخزن',
+    market_holding_unavailable: 'السعر اللحظي غير متاح؛ تُعرض القيمة المحفوظة',
+    market_refreshing: 'جارٍ التحديث…',
 
     // Month Names
     month_0: 'يناير', month_1: 'فبراير', month_2: 'مارس', month_3: 'أبريل',
@@ -128,6 +160,8 @@ const DICTIONARY = {
     budget_over: 'تجاوز',
 
     // More Page
+    more_expenses: 'المصروفات',
+    more_expenses_sub: 'إدارة وتعديل المصروفات المسجلة',
     more_debts: 'الديون',
     more_debts_sub: 'تتبع ديونك والأقساط المستحقة',
     more_inv: 'الاستثمارات',
@@ -158,13 +192,6 @@ const DICTIONARY = {
     toast_lang: 'تم تغيير اللغة إلى العربية',
     toast_theme: 'تم تغيير المظهر',
     toast_invalid: 'يرجى إدخال بيانات صحيحة',
-
-    // AI Advisor
-    ai_advisor_title: 'المستشار المالي الذكي',
-    ai_advisor_desc: 'تكوين ذكاء Gemini الاصطناعي',
-    ai_generate_btn: 'اطلب نصيحة',
-    ai_generating: 'جاري التحليل',
-    ai_error_conn: 'حدث خطأ أثناء الاتصال بالخادم. تأكد من صحة المفتاح.',
 
     // Modals & Labels
     label_category: 'الفئة',
@@ -221,6 +248,171 @@ const DICTIONARY = {
     notif_prompt_body: 'هل تريد تلقي تنبيهات عن الديون والميزانية؟',
     notif_prompt_enable: 'تفعيل',
     notif_prompt_later: 'لاحقاً',
+
+    // Complete UI localization
+    app_title: 'ميزانيتي — مدير الميزانية الشخصية',
+    app_description: 'تطبيق متكامل لإدارة الميزانية الشخصية والمصروفات والديون والاستثمارات',
+    app_offline_ready: 'يعمل بالكامل بدون إنترنت',
+    dash_analyzing: 'جاري تحليل بياناتك...',
+    count_label: 'العدد',
+    new: 'جديد',
+    income_sources: 'مصادر الدخل',
+    income_source_count_label: 'عدد المصادر',
+    expense_count_label: 'عدد العمليات',
+    debt_count_label: 'عدد الديون',
+    empty_income: 'لا يوجد دخل مسجل',
+    empty_income_sub: 'اضغط + لإضافة مصدر دخل جديد',
+    empty_expenses: 'لا توجد مصروفات',
+    empty_expenses_sub: 'اضغط + لتسجيل مصروف جديد',
+    empty_category_data: 'لا توجد بيانات',
+    empty_tx_search_sub: 'جرّب تغيير الفلتر أو مصطلح البحث',
+    empty_tx_filter_sub: 'جرّب فلترًا مختلفًا',
+    date_unspecified: 'غير محدد',
+    budget_set_title: 'تحديد الميزانية',
+    budget_usage_title: 'تقرير الاستخدام',
+    analytics_title: 'التحليلات الذكية',
+    more_income: 'مصادر الدخل',
+    more_income_sub: 'راتب، عمل حر، مشاريع',
+    more_subscriptions: 'الاشتراكات الشهرية',
+    more_subscriptions_sub: 'تتبع اشتراكاتك الدورية والفواتير',
+    more_appearance: 'المظهر',
+    theme_dark: 'الوضع الداكن',
+    theme_light: 'الوضع الفاتح',
+    subscriptions_title: 'الاشتراكات الدورية',
+    subscriptions_empty: 'لا توجد اشتراكات مضافة بعد',
+    subscription_renewal: 'التجديد',
+    income_form_title: 'إضافة دخل',
+    income_name_label: 'المسمى / اسم المصدر *',
+    income_name_placeholder: 'مثال: راتب شهر يونيو',
+    amount_egp_required: 'المبلغ (ج.م) *',
+    income_source_type_label: 'نوع المصدر',
+    date_required: 'التاريخ *',
+    notes_optional_placeholder: 'ملاحظات اختيارية...',
+    expense_form_title: 'إضافة مصروف',
+    expense_name_label: 'وصف المصروف *',
+    expense_name_placeholder: 'مثال: فاتورة الكهرباء',
+    debt_form_title: 'إضافة دين',
+    debt_creditor_label: 'اسم الدائن *',
+    debt_creditor_placeholder: 'مثال: بنك مصر، علي محمد...',
+    debt_total_egp_required: 'إجمالي الدين (ج.م) *',
+    debt_notes_placeholder: 'شروط السداد، ملاحظات...',
+    confirm_delete_title: 'تأكيد الحذف',
+    confirm_delete_warning: 'لا يمكن التراجع عن هذا الإجراء.',
+    subscription_form_title: 'إضافة اشتراك',
+    subscription_name_label: 'اسم الاشتراك *',
+    subscription_name_placeholder: 'مثال: نتفليكس، جيم، إنترنت...',
+    subscription_cost_egp_required: 'التكلفة (ج.م) *',
+    subscription_renewal_label: 'موعد التجديد (شهريًا)',
+    ok: 'حسنًا',
+    offline_banner: 'لا يوجد اتصال بالإنترنت — التطبيق يعمل بشكل كامل',
+    privacy_hide: 'إخفاء القيم المالية',
+    privacy_show: 'إظهار القيم المالية',
+    privacy_mode: 'الخصوصية المالية',
+    install_app: 'تثبيت التطبيق',
+    notif_push_title: 'تنبيهات النظام (Push)',
+    notif_push_sub: 'تلقي إشعارات على الهاتف في الخلفية',
+    notif_push_enable: 'تفعيل',
+    notif_push_enabled: 'مفعل ✅',
+    notif_push_blocked: 'محظور ❌',
+    notif_smart_budget_title: 'تنبيهات الميزانية الذكية',
+    notif_smart_budget_sub: 'تحذير عند تجاوز الميزانية',
+    notif_debt_alerts_title: 'تنبيهات الديون المستحقة',
+    notif_debt_alerts_sub: 'تذكير بمواعيد السداد',
+    notif_insights_title: 'نصائح التحليل الذكي',
+    notif_insights_sub: 'اقتراحات للادخار والاستثمار',
+    notif_weekly_title: 'الملخص الأسبوعي',
+    notif_weekly_sub: 'نظرة عامة على أدائك كل أسبوع',
+    notif_already_enabled: 'الإشعارات مفعلة بالفعل',
+    notif_allow_browser: 'الرجاء السماح بالإشعارات من إعدادات المتصفح',
+    notif_enabled: 'تم التفعيل بنجاح',
+    notif_rejected: 'تم الرفض',
+    notif_settings_saved: 'تم حفظ إعدادات الإشعارات',
+    income_name_required: 'أدخل اسم مصدر الدخل',
+    expense_name_required: 'أدخل اسم المصروف',
+    debt_creditor_required: 'أدخل اسم الدائن',
+    amount_required: 'أدخل المبلغ',
+    amount_positive: 'المبلغ يجب أن يكون رقمًا موجبًا',
+    debt_amount_required: 'أدخل قيمة الدين',
+    debt_amount_positive: 'قيمة الدين يجب أن تكون رقمًا موجبًا',
+    value_too_large: 'القيمة كبيرة جدًا',
+    date_input_required: 'أدخل التاريخ',
+    debt_no_due_date: 'بدون استحقاق',
+    debt_due_prefix: 'الاستحقاق',
+    debt_overdue_days: 'أيام التأخير: {count}',
+    debt_remaining_days: 'الأيام المتبقية: {count}',
+    debt_due_today: 'مستحق اليوم',
+    comp_of_expenses: 'من المصروفات',
+    budget_not_set: 'لم تُحدد ميزانية',
+    budget_used: 'مستخدم',
+    budget_remaining_value: 'متبقي {amount}',
+    budget_over_by: 'تجاوزت بـ {amount}',
+    notif_time_minutes: 'منذ {count} د',
+    notif_time_hours: 'منذ {count} س',
+    notif_time_days: 'منذ {count} أيام',
+    notif_greeting_am_title: 'صباح الخير 👋',
+    notif_greeting_pm_title: 'مساء الخير 👋',
+    notif_greeting_eve_title: 'مساء النور 👋',
+    print_title: 'تقرير ميزانيتي — {month} {year}',
+    print_summary_title: 'ملخص ميزانيتي',
+    print_period: 'تقرير شهر {month} {year} · تاريخ الطباعة: {date}',
+    print_metric: 'المؤشر',
+    print_value: 'القيمة',
+    print_spend_rate: 'نسبة الإنفاق',
+    print_action: 'طباعة',
+    backup_export_success: 'تم تصدير البيانات',
+    backup_invalid_record: 'سجل غير صالح في {label}',
+    backup_unknown_field: 'حقل غير معروف في {label}: {field}',
+    backup_text_missing: 'حقل نصي مفقود: {label}',
+    backup_invalid_type: 'نوع غير صالح للحقل: {label}',
+    backup_text_too_long: 'النص طويل جدًا في: {label}',
+    backup_empty_field: 'حقل فارغ: {label}',
+    backup_invalid_number: 'قيمة رقمية غير صالحة في: {label}',
+    backup_invalid_date: 'تاريخ غير صالح في: {label}',
+    backup_invalid_choice: 'اختيار غير صالح في: {label}',
+    backup_duplicate_id: 'معرّف مكرر في: {label}',
+    backup_invalid_collection: 'مجموعة غير صالحة: {label}',
+    backup_invalid_boolean: 'قيمة منطقية غير صالحة في: {label}',
+    backup_invalid_format: 'صيغة الملف غير صحيحة',
+    backup_too_large: 'الملف كبير جدًا (الحد 5MB)',
+    backup_keys_invalid: 'ملف النسخة الاحتياطية يحتوي مفاتيح ناقصة أو غير معروفة',
+    backup_rollback_failed: 'فشل الاستيراد وتعذر استعادة بعض البيانات السابقة. قد تكون البيانات الحالية غير مكتملة؛ تحقّق منها قبل المتابعة.',
+    backup_import_failed: 'تعذر استيراد البيانات',
+    backup_import_success: 'تم استيراد البيانات بنجاح',
+    backup_invalid_file: 'الملف غير صالح أو تالف',
+    backup_read_failed: 'تعذر قراءة الملف',
+    collection_income: 'الدخل',
+    collection_expenses: 'المصروفات',
+    collection_debts: 'الديون',
+    collection_investments: 'الاستثمارات',
+    collection_subscriptions: 'الاشتراكات',
+    collection_budget: 'الميزانية',
+    collection_settings: 'الإعدادات',
+    smart_debt_due_today_title: '⚠️ دين مستحق اليوم',
+    smart_debt_due_today_body: 'الدين لصالح: {creditor} بقيمة {amount} مستحق اليوم!',
+    smart_debt_due_soon_title: '📅 اقترب موعد سداد دين',
+    smart_debt_due_soon_body: 'تذكير: لديك دين لصالح {creditor} يستحق خلال {days} أيام.',
+    smart_debt_high_title: '🚨 تحذير: مستوى ديون مرتفع',
+    smart_debt_high_body: 'ديونك الحالية تتجاوز 50% من دخلك الشهري. حاول التركيز على سداد الديون قبل زيادة النفقات الترفيهية.',
+    smart_budget_over_title: '🔴 ميزانية مخترقة!',
+    smart_budget_over_body: 'لقد تجاوزت إنفاقك حد الدخل المتاح لهذا الشهر. كل قرش تنفقه الآن يعتبر عجزًا.',
+    smart_budget_warn_title: '🟡 إنذار ميزانية عامة',
+    smart_budget_warn_body: 'أنفقت {rate}% من دخلك. حاول تقنين المصروفات حتى نهاية الشهر.',
+    smart_category_over_title: '🔴 تجاوزت ميزانية {category}',
+    smart_category_over_body: 'لقد تجاوزت الميزانية المخصصة لـ ({category}). أنفقت {spent} من أصل {limit}.',
+    smart_category_warn_title: '🟡 اقتربت من حد {category}',
+    smart_category_warn_body: 'استهلكت {rate}% من ميزانية {category}. المتبقي {remaining} فقط!',
+    smart_subscription_due_title: '🔔 تجديد اشتراك اليوم',
+    smart_subscription_due_body: 'اشتراكك في ({name}) يستحق التجديد اليوم بقيمة {amount}.',
+    smart_subscription_soon_title: '📅 اقترب تجديد اشتراك',
+    smart_subscription_soon_body: 'تذكير: اشتراك ({name}) يتجدد خلال {days} أيام بقيمة {amount}.',
+    smart_saving_tip_title: '💡 نصيحة ذكية: قاعدة 50/30/20',
+    smart_saving_tip_body: 'فائضك الحالي هو {rate}%. الخبراء ينصحون بادخار أو استثمار 20% على الأقل من الدخل لضمان مستقبل مالي مستقر.',
+    smart_saving_success_title: '🌟 أداء مالي ممتاز!',
+    smart_saving_success_body: 'أنت بطل! لقد وفرت {rate}% من دخلك. أنت على الطريق الصحيح للحرية المالية.',
+    smart_invest_tip_title: '📈 اجعل أموالك تعمل لأجلك',
+    smart_invest_tip_body: 'رائع أنك تدخر! لكن هل فكرت في الاستثمار؟ الاستثمار يحمي أموالك من التضخم ويضاعف ثروتك بمرور الوقت.',
+    smart_weekly_title: '📊 ملخصك الأسبوعي',
+    smart_weekly_body: 'أنفقت هذا الشهر إجمالي {amount}. اضغط هنا لرؤية تحليلاتك والتصنيفات التي استهلكت ميزانيتك.',
   },
   en: {
     // Categories
@@ -247,6 +439,38 @@ const DICTIONARY = {
     inv_crypto: 'Crypto',
     inv_savings: 'Savings',
     inv_other: 'Other',
+    inv_total_capital_label: 'Total Capital',
+    inv_total_profit_label: 'Total Profit',
+    inv_count_label: 'Investment Count',
+    inv_form_title: 'Add Investment',
+    inv_name_label: 'Investment name *',
+    inv_name_placeholder: 'Example: CIB shares or gold',
+    inv_type_label: 'Investment type',
+    inv_start_label: 'Start date',
+    inv_capital_label: 'Purchase cost (EGP) *',
+    inv_quantity_label: 'Quantity (grams/shares)',
+    inv_quantity_placeholder: 'Optional for gold and shares',
+    inv_profit_label: 'Manual profit (if any)',
+    inv_profit_placeholder: 'Calculated automatically when quantity is provided',
+    investment_return: 'Return',
+    unit_investment: 'investment',
+    unit_share: 'share',
+    unit_gram: 'gram',
+    market_error: 'Could not load market prices ⚠️',
+    market_updated: 'Last updated',
+    market_stale: 'cached data',
+    market_refresh: 'Refresh ↻',
+    market_gold_24: '🥇 24K Gold',
+    market_gold_21: '🥇 21K Gold',
+    market_silver: '🥈 Silver',
+    market_usd: '💵 US Dollar',
+    market_per_gram: 'EGP/gram',
+    market_partial: 'Some stock prices are currently unavailable: {symbols}',
+    market_quote_cached: 'cached quote',
+    market_quote_cached_at: 'cached: {time}',
+    market_holding_cached: 'Valuation uses the last cached quote',
+    market_holding_unavailable: 'Live price unavailable; showing the stored value',
+    market_refreshing: 'Refreshing…',
 
     // Month Names
     month_0: 'January', month_1: 'February', month_2: 'March', month_3: 'April',
@@ -347,6 +571,8 @@ const DICTIONARY = {
     budget_over: 'Over',
 
     // More Page
+    more_expenses: 'Expenses',
+    more_expenses_sub: 'Manage and edit recorded expenses',
     more_debts: 'Debts',
     more_debts_sub: 'Track debts and dues',
     more_inv: 'Investments',
@@ -377,17 +603,6 @@ const DICTIONARY = {
     toast_lang: 'Language changed to English',
     toast_theme: 'Theme changed',
     toast_invalid: 'Please enter valid data',
-
-    // AI Advisor
-    ai_advisor_title: 'AI Financial Advisor',
-    ai_advisor_desc: 'Configure Gemini AI',
-    ai_generate_btn: 'Generate Insights',
-    ai_generating: 'Analyzing',
-    ai_settings_title: '🤖 AI Advisor Settings',
-    ai_settings_privacy: 'For your privacy, we don\'t send data to our servers. Please enter your <strong>Google Gemini API Key</strong>.',
-    ai_save_key: 'Save Key',
-    ai_get_key: 'Get a free key here',
-    ai_error_conn: 'Connection error. Check your API key.',
 
     // Modals & Labels
     label_category: 'Category',
@@ -444,20 +659,195 @@ const DICTIONARY = {
     notif_prompt_body: 'Would you like to receive alerts about debts and budget?',
     notif_prompt_enable: 'Enable',
     notif_prompt_later: 'Later',
+
+    // Complete UI localization
+    app_title: 'Mizanity — Personal Finance Manager',
+    app_description: 'A complete app for managing personal budgets, expenses, debts, and investments',
+    app_offline_ready: 'Works fully offline',
+    dash_analyzing: 'Analyzing your data...',
+    count_label: 'Count',
+    new: 'New',
+    income_sources: 'Income Sources',
+    income_source_count_label: 'Number of Sources',
+    expense_count_label: 'Number of Transactions',
+    debt_count_label: 'Number of Debts',
+    empty_income: 'No income recorded',
+    empty_income_sub: 'Select + to add a new income source',
+    empty_expenses: 'No expenses recorded',
+    empty_expenses_sub: 'Select + to record a new expense',
+    empty_category_data: 'No data available',
+    empty_tx_search_sub: 'Try changing the filter or search term',
+    empty_tx_filter_sub: 'Try a different filter',
+    date_unspecified: 'Unspecified',
+    budget_set_title: 'Set Budget',
+    budget_usage_title: 'Usage Report',
+    analytics_title: 'Smart Analytics',
+    more_income: 'Income Sources',
+    more_income_sub: 'Salary, freelance, and business',
+    more_subscriptions: 'Monthly Subscriptions',
+    more_subscriptions_sub: 'Track recurring subscriptions and bills',
+    more_appearance: 'Appearance',
+    theme_dark: 'Dark mode',
+    theme_light: 'Light mode',
+    subscriptions_title: 'Recurring Subscriptions',
+    subscriptions_empty: 'No subscriptions added yet',
+    subscription_renewal: 'Renewal',
+    income_form_title: 'Add Income',
+    income_name_label: 'Label / source name *',
+    income_name_placeholder: 'Example: June salary',
+    amount_egp_required: 'Amount (EGP) *',
+    income_source_type_label: 'Source Type',
+    date_required: 'Date *',
+    notes_optional_placeholder: 'Optional notes...',
+    expense_form_title: 'Add Expense',
+    expense_name_label: 'Expense description *',
+    expense_name_placeholder: 'Example: electricity bill',
+    debt_form_title: 'Add Debt',
+    debt_creditor_label: 'Creditor name *',
+    debt_creditor_placeholder: 'Example: Banque Misr, Ali Mohamed...',
+    debt_total_egp_required: 'Total debt (EGP) *',
+    debt_notes_placeholder: 'Repayment terms, notes...',
+    confirm_delete_title: 'Confirm deletion',
+    confirm_delete_warning: 'This action cannot be undone.',
+    subscription_form_title: 'Add Subscription',
+    subscription_name_label: 'Subscription name *',
+    subscription_name_placeholder: 'Example: Netflix, gym, internet...',
+    subscription_cost_egp_required: 'Cost (EGP) *',
+    subscription_renewal_label: 'Renewal date (monthly)',
+    ok: 'OK',
+    offline_banner: 'No internet connection — the app remains fully available',
+    privacy_hide: 'Hide financial values',
+    privacy_show: 'Show financial values',
+    privacy_mode: 'Financial privacy',
+    install_app: 'Install app',
+    notif_push_title: 'System Notifications (Push)',
+    notif_push_sub: 'Receive phone notifications in the background',
+    notif_push_enable: 'Enable',
+    notif_push_enabled: 'Enabled ✅',
+    notif_push_blocked: 'Blocked ❌',
+    notif_smart_budget_title: 'Smart Budget Alerts',
+    notif_smart_budget_sub: 'Warn when the budget is exceeded',
+    notif_debt_alerts_title: 'Debt Due Alerts',
+    notif_debt_alerts_sub: 'Payment due-date reminders',
+    notif_insights_title: 'Smart Analysis Tips',
+    notif_insights_sub: 'Saving and investment suggestions',
+    notif_weekly_title: 'Weekly Summary',
+    notif_weekly_sub: 'A weekly overview of your performance',
+    notif_already_enabled: 'Notifications are already enabled',
+    notif_allow_browser: 'Allow notifications in your browser settings',
+    notif_enabled: 'Enabled successfully',
+    notif_rejected: 'Permission denied',
+    notif_settings_saved: 'Notification settings saved',
+    income_name_required: 'Enter the income source name',
+    expense_name_required: 'Enter the expense name',
+    debt_creditor_required: 'Enter the creditor name',
+    amount_required: 'Enter the amount',
+    amount_positive: 'The amount must be a positive number',
+    debt_amount_required: 'Enter the debt amount',
+    debt_amount_positive: 'The debt amount must be a positive number',
+    value_too_large: 'The value is too large',
+    date_input_required: 'Enter the date',
+    debt_no_due_date: 'No due date',
+    debt_due_prefix: 'Due',
+    debt_overdue_days: 'Days overdue: {count}',
+    debt_remaining_days: 'Days remaining: {count}',
+    debt_due_today: 'Due today',
+    comp_of_expenses: 'of expenses',
+    budget_not_set: 'No budget set',
+    budget_used: 'used',
+    budget_remaining_value: 'Remaining {amount}',
+    budget_over_by: 'Over by {amount}',
+    notif_time_minutes: '{count}m ago',
+    notif_time_hours: '{count}h ago',
+    notif_time_days: '{count}d ago',
+    notif_greeting_am_title: 'Good morning 👋',
+    notif_greeting_pm_title: 'Good afternoon 👋',
+    notif_greeting_eve_title: 'Good evening 👋',
+    print_title: 'Mizanity Report — {month} {year}',
+    print_summary_title: 'Mizanity Summary',
+    print_period: '{month} {year} report · Printed: {date}',
+    print_metric: 'Metric',
+    print_value: 'Value',
+    print_spend_rate: 'Spending Rate',
+    print_action: 'Print',
+    backup_export_success: 'Data exported',
+    backup_invalid_record: 'Invalid record in {label}',
+    backup_unknown_field: 'Unknown field in {label}: {field}',
+    backup_text_missing: 'Missing text field: {label}',
+    backup_invalid_type: 'Invalid field type: {label}',
+    backup_text_too_long: 'Text is too long in: {label}',
+    backup_empty_field: 'Empty field: {label}',
+    backup_invalid_number: 'Invalid numeric value in: {label}',
+    backup_invalid_date: 'Invalid date in: {label}',
+    backup_invalid_choice: 'Invalid choice in: {label}',
+    backup_duplicate_id: 'Duplicate identifier in: {label}',
+    backup_invalid_collection: 'Invalid collection: {label}',
+    backup_invalid_boolean: 'Invalid boolean value in: {label}',
+    backup_invalid_format: 'Invalid file format',
+    backup_too_large: 'The file is too large (5MB limit)',
+    backup_keys_invalid: 'The backup contains missing or unknown keys',
+    backup_rollback_failed: 'Import failed and some previous data could not be restored. Current data may be incomplete; verify it before continuing.',
+    backup_import_failed: 'Could not import data',
+    backup_import_success: 'Data imported successfully',
+    backup_invalid_file: 'The file is invalid or corrupted',
+    backup_read_failed: 'Could not read the file',
+    collection_income: 'income',
+    collection_expenses: 'expenses',
+    collection_debts: 'debts',
+    collection_investments: 'investments',
+    collection_subscriptions: 'subscriptions',
+    collection_budget: 'budget',
+    collection_settings: 'settings',
+    smart_debt_due_today_title: '⚠️ Debt due today',
+    smart_debt_due_today_body: 'The debt owed to {creditor}, totaling {amount}, is due today!',
+    smart_debt_due_soon_title: '📅 Debt payment approaching',
+    smart_debt_due_soon_body: 'Reminder: the debt owed to {creditor} is due in {days} days.',
+    smart_debt_high_title: '🚨 Warning: high debt level',
+    smart_debt_high_body: 'Your current debt exceeds 50% of your monthly income. Focus on repayment before increasing discretionary expenses.',
+    smart_budget_over_title: '🔴 Budget exceeded!',
+    smart_budget_over_body: 'Your spending has exceeded this month’s available income. Every additional expense now increases the deficit.',
+    smart_budget_warn_title: '🟡 General budget warning',
+    smart_budget_warn_body: 'You have spent {rate}% of your income. Consider limiting expenses for the rest of the month.',
+    smart_category_over_title: '🔴 {category} budget exceeded',
+    smart_category_over_body: 'You exceeded the budget for {category}. You spent {spent} out of {limit}.',
+    smart_category_warn_title: '🟡 Approaching the {category} limit',
+    smart_category_warn_body: 'You used {rate}% of the {category} budget. Only {remaining} remains.',
+    smart_subscription_due_title: '🔔 Subscription renews today',
+    smart_subscription_due_body: 'Your {name} subscription renews today for {amount}.',
+    smart_subscription_soon_title: '📅 Subscription renewal approaching',
+    smart_subscription_soon_body: 'Reminder: your {name} subscription renews in {days} days for {amount}.',
+    smart_saving_tip_title: '💡 Smart tip: the 50/30/20 rule',
+    smart_saving_tip_body: 'Your current surplus is {rate}%. Experts recommend saving or investing at least 20% of income for long-term stability.',
+    smart_saving_success_title: '🌟 Excellent financial performance!',
+    smart_saving_success_body: 'Great work! You saved {rate}% of your income and are on the right path to financial freedom.',
+    smart_invest_tip_title: '📈 Put your money to work',
+    smart_invest_tip_body: 'Saving is a strong start. Consider investing to protect your money from inflation and grow long-term wealth.',
+    smart_weekly_title: '📊 Your weekly summary',
+    smart_weekly_body: 'You spent {amount} this month. Open analytics to review the categories using your budget.',
   }
 };
 
-let currentLang = localStorage.getItem('cashpilot_lang') || 'ar';
+function readStoredLanguage() {
+  try {
+    return globalThis.localStorage?.getItem('cashpilot_lang') === 'en' ? 'en' : 'ar';
+  } catch {
+    return 'ar';
+  }
+}
+
+let currentLang = readStoredLanguage();
 
 export function getLang() {
   return currentLang;
 }
 
 export function setLang(lang) {
-  currentLang = lang;
-  localStorage.setItem('cashpilot_lang', lang);
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  currentLang = lang === 'en' ? 'en' : 'ar';
+  try { globalThis.localStorage?.setItem('cashpilot_lang', currentLang); } catch { /* storage unavailable */ }
+  if (globalThis.document?.documentElement) {
+    document.documentElement.lang = currentLang;
+    document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  }
   translatePage();
 }
 
@@ -468,20 +858,55 @@ export function toggleLang() {
 
 export function t(key) {
   if (!DICTIONARY[currentLang]) return key;
-  return DICTIONARY[currentLang][key] || key;
+  return Object.hasOwn(DICTIONARY[currentLang], key) ? DICTIONARY[currentLang][key] : key;
+}
+
+export function tf(key, params = {}) {
+  return t(key).replace(/\{([a-zA-Z0-9_]+)\}/g, (match, name) => (
+    Object.hasOwn(params, name) ? String(params[name]) : match
+  ));
+}
+
+export function getTranslationKeys(lang) {
+  return Object.keys(DICTIONARY[lang] || {});
+}
+
+/** مزامنة اسم زر اللغة مع اللغة الهدف، لا اللغة الحالية. */
+export function syncLanguageControl(
+  button = globalThis.document?.getElementById?.('moreLangBtn'),
+) {
+  if (!button) return null;
+  const label = t('more_lang_sub');
+  button.setAttribute('aria-label', label);
+  button.setAttribute('title', label);
+  if (button.dataset) button.dataset.currentLanguage = currentLang;
+  return { language: currentLang, label };
 }
 
 export function translatePage() {
+  if (!globalThis.document?.querySelectorAll) return;
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    el.innerHTML = t(key);
+    el.textContent = t(key);
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     el.setAttribute('placeholder', t(key));
   });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria-label')));
+  });
+  document.querySelectorAll('[data-i18n-content]').forEach(el => {
+    el.setAttribute('content', t(el.getAttribute('data-i18n-content')));
+  });
+  syncLanguageControl();
 }
 
-// Initial setup
-document.documentElement.lang = currentLang;
-document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+// Initial setup (guarded so the translation module can also be unit-tested in Node).
+if (globalThis.document?.documentElement) {
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+}

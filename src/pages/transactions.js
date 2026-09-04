@@ -13,28 +13,28 @@ export function renderTransactions() {
   const { filterMonth: m, filterYear: y, searchQuery } = getState();
   const all = Finance.searchTransactions(searchQuery, m, y);
 
-  set('tx-count', all.length + ' ' + t('nav_transactions'));
+  set('tx-count', `${t('count_label')}: ${all.length}`);
 
   const container = document.getElementById('transactions-list');
   if (!container) return;
 
   if (!all.length) {
-    container.innerHTML = emptyStateHTML('ic-search', t('empty_tx'), 'جرب تغيير الفلتر أو مصطلح البحث');
+    container.innerHTML = emptyStateHTML('ic-search', t('empty_tx'), t('empty_tx_search_sub'));
     return;
   }
 
   // تجميع حسب التاريخ
   const grouped = {};
   all.forEach(tx => {
-    const key = tx.date || 'غير محدد';
+    const key = tx.date || '';
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(tx);
   });
 
   container.innerHTML = Object.entries(grouped)
-    .sort(([a], [b]) => new Date(b) - new Date(a))
+    .sort(([a], [b]) => (b ? new Date(b).getTime() : 0) - (a ? new Date(a).getTime() : 0))
     .map(([date, txs]) => `
-      <div class="tx-date-header">${formatDate(date)}</div>
+      <div class="tx-date-header">${date ? formatDate(date) : t('date_unspecified')}</div>
       ${txs.map(txItemHTML).join('')}
     `).join('');
 }
@@ -56,13 +56,13 @@ export function filterTransactions(type) {
   if (!container) return;
 
   if (!all.length) {
-    container.innerHTML = emptyStateHTML('ic-search', t('empty_tx'), 'جرب فلتراً مختلفاً');
+    container.innerHTML = emptyStateHTML('ic-search', t('empty_tx'), t('empty_tx_filter_sub'));
   } else {
     container.innerHTML = all.map(txItemHTML).join('');
   }
 
   const countEl = document.getElementById('tx-count');
-  if (countEl) countEl.textContent = all.length + ' ' + t('nav_transactions');
+  if (countEl) countEl.textContent = `${t('count_label')}: ${all.length}`;
 }
 
 /** ربط حقل البحث */

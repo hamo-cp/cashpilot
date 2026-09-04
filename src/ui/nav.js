@@ -5,9 +5,10 @@
 
 import { getState, setState } from '../core/state.js';
 import { SWIPE_PAGES }         from '../core/constants.js';
+import { t }                   from '../core/i18n.js';
 
 /** الصفحات الفرعية التي تنتمي لزر "المزيد" */
-const MORE_CHILDREN = ['debts', 'investments', 'income'];
+const MORE_CHILDREN = ['expenses', 'debts', 'investments', 'income', 'subscriptions', 'budget', 'notifications'];
 
 /**
  * الانتقال لصفحة معينة وتحديث الـ DOM.
@@ -26,11 +27,41 @@ export function navigateTo(page, renderPage) {
   document.querySelectorAll('.bottom-nav-item').forEach(btn => {
     const btnPage    = btn.dataset.page;
     const isMoreChild = MORE_CHILDREN.includes(page);
-    const isActive   = btnPage === page || (isMoreChild && btnPage === 'more');
+    const isActive   = isMoreChild ? btnPage === 'more' : btnPage === page;
     btn.classList.toggle('active', isActive);
   });
 
   if (typeof renderPage === 'function') renderPage(page);
+
+  // كل صفحة تبدأ من أعلى viewport؛ الـ main-content ليس scroll container مستقلاً.
+  const scrollRoot = document.scrollingElement || document.documentElement;
+  if (scrollRoot) {
+    scrollRoot.scrollTop = 0;
+    scrollRoot.scrollLeft = 0;
+  }
+}
+
+/** تركيز عنصر دون تحريك موضع الصفحة، مع fallback للمتصفحات الأقدم. */
+export function focusElementSafely(element) {
+  if (!element || typeof element.focus !== 'function') return null;
+  try {
+    element.focus({ preventScroll: true });
+  } catch {
+    element.focus();
+  }
+  return element;
+}
+
+/** نقل التركيز إلى بداية وجهة SPA عند طلب ذلك صراحةً (مثل فتح إشعار). */
+export function focusPageDestination(page, root = document) {
+  const pageElement = root.getElementById(`page-${page}`);
+  if (!pageElement) return null;
+
+  const target = pageElement.querySelector('.page-title, .hero-title, .section-title, h1, h2')
+    || pageElement;
+  target.setAttribute?.('tabindex', '-1');
+  target.classList?.add('navigation-focus-target');
+  return focusElementSafely(target);
 }
 
 /** ربط أزرار bottom-nav وdata-page */
@@ -52,6 +83,15 @@ export function bindCenterButton(onPress) {
   });
 }
 
+/** مزامنة الحالة البصرية والمعلنة لفلاتر المعاملات. */
+export function syncFilterChipSelection(selectedChip, root = document) {
+  root.querySelectorAll('.filter-chip').forEach(chip => {
+    const selected = chip === selectedChip;
+    chip.classList.toggle('active', selected);
+    chip.setAttribute('aria-pressed', String(selected));
+  });
+}
+
 /** إعداد فلتري الشهر والسنة */
 export function setupFilters(onChange) {
   const now      = new Date();
@@ -59,12 +99,9 @@ export function setupFilters(onChange) {
   const yearSel  = document.getElementById('filterYear');
 
   if (monthSel) {
-    const months = [
-      'يناير','فبراير','مارس','أبريل','مايو','يونيو',
-      'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر',
-    ];
-    months.forEach((m, i) => {
-      const opt = new Option(m, i + 1);
+    Array.from({ length: 12 }, (_, i) => `month_${i}`).forEach((key, i) => {
+      const opt = new Option(t(key), i + 1);
+      opt.dataset.i18n = key;
       if (i + 1 === now.getMonth() + 1) opt.selected = true;
       monthSel.add(opt);
     });

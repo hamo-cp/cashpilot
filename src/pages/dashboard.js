@@ -86,7 +86,7 @@ export function renderDashboard() {
     const all = Finance.searchTransactions('', m, y).slice(0, 6);
     container.innerHTML = all.length
       ? all.map(txItemHTML).join('')
-      : emptyStateHTML('ic-list', 'لا توجد معاملات', 'أضف دخلاً أو مصروفاً للبدء');
+      : emptyStateHTML('ic-list', t('empty_tx'), t('empty_tx_sub'));
   }
 
   // Donut chart

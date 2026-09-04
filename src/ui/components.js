@@ -6,7 +6,7 @@
 
 import { esc, svgIcon, formatCurrency, formatDate, formatPercent, daysUntil } from '../core/utils.js';
 import { EXPENSE_CATEGORIES, INCOME_SOURCES, INVESTMENT_TYPES }               from '../core/constants.js';
-import { t }                                                                   from '../core/i18n.js';
+import { t, tf }                                                               from '../core/i18n.js';
 
 /** تحويل اسم اللون لـ CSS variable key */
 function colorKey(color) {
@@ -31,7 +31,7 @@ export function txItemHTML(tx) {
            style="background:var(--color-${ck}-dim);color:var(--color-${ck})">${iconSvg}</div>
       <div class="transaction-info">
         <div class="transaction-name">${esc(tx.name)}</div>
-        <div class="transaction-meta">${cat.label} · ${formatDate(tx.date)}</div>
+        <div class="transaction-meta">${esc(t(cat.label))} · ${formatDate(tx.date)}</div>
       </div>
       <div class="transaction-amount ${isIncome ? 'income' : 'expense'}">
         ${isIncome ? '+' : '−'}${formatCurrency(tx.amount)}
@@ -49,17 +49,17 @@ export function incomeItemHTML(item) {
            style="background:var(--color-${ck}-dim);color:var(--color-${ck})">${svgIcon(src.iconId)}</div>
       <div class="transaction-info">
         <div class="transaction-name">${esc(item.name)}</div>
-        <div class="transaction-meta">${src.label} · ${formatDate(item.date)}</div>
+        <div class="transaction-meta">${esc(t(src.label))} · ${formatDate(item.date)}</div>
         ${item.notes ? `<div class="transaction-meta">${esc(item.notes)}</div>` : ''}
       </div>
       <div class="transaction-amount income">${formatCurrency(item.amount)}</div>
       <div class="transaction-actions">
-        <button class="btn btn-ghost btn-icon btn-sm"
-                onclick="App.openIncomeModal('${item.id}')" title="${t('edit')}">
+        <button class="btn btn-ghost btn-icon btn-sm" data-app-action="edit"
+                data-item-type="income" data-item-id="${esc(item.id)}" title="${esc(t('edit'))}">
           ${svgIcon('ic-edit')}
         </button>
-        <button class="btn btn-danger btn-icon btn-sm"
-                onclick="App.confirmDelete('income','${item.id}')" title="${t('delete')}">
+        <button class="btn btn-danger btn-icon btn-sm" data-app-action="delete"
+                data-item-type="income" data-item-id="${esc(item.id)}" title="${esc(t('delete'))}">
           ${svgIcon('ic-trash')}
         </button>
       </div>
@@ -76,16 +76,16 @@ export function expenseItemHTML(item) {
            style="background:var(--color-${ck}-dim);color:var(--color-${ck})">${svgIcon(cat.iconId)}</div>
       <div class="transaction-info">
         <div class="transaction-name">${esc(item.name)}</div>
-        <div class="transaction-meta">${cat.label} · ${formatDate(item.date)}</div>
+        <div class="transaction-meta">${esc(t(cat.label))} · ${formatDate(item.date)}</div>
       </div>
       <div class="transaction-amount expense">−${formatCurrency(item.amount)}</div>
       <div class="transaction-actions">
-        <button class="btn btn-ghost btn-icon btn-sm"
-                onclick="App.openExpenseModal('${item.id}')" title="${t('edit')}">
+        <button class="btn btn-ghost btn-icon btn-sm" data-app-action="edit"
+                data-item-type="expense" data-item-id="${esc(item.id)}" title="${esc(t('edit'))}">
           ${svgIcon('ic-edit')}
         </button>
-        <button class="btn btn-danger btn-icon btn-sm"
-                onclick="App.confirmDelete('expense','${item.id}')" title="${t('delete')}">
+        <button class="btn btn-danger btn-icon btn-sm" data-app-action="delete"
+                data-item-type="expense" data-item-id="${esc(item.id)}" title="${esc(t('delete'))}">
           ${svgIcon('ic-trash')}
         </button>
       </div>
@@ -105,12 +105,15 @@ export function debtCardHTML(debt) {
   if (days !== null) {
     if (days < 0) {
       statusClass = 'overdue';
-      statusBadge = `<span class="badge badge-red">${svgIcon('ic-alert')} متأخر ${Math.abs(days)} يوم</span>`;
+      statusBadge = `<span class="badge badge-red">${svgIcon('ic-alert')} ${tf('debt_overdue_days', { count: Math.abs(days) })}</span>`;
+    } else if (days === 0) {
+      statusClass = 'warning';
+      statusBadge = `<span class="badge badge-orange">${svgIcon('ic-alert')} ${t('debt_due_today')}</span>`;
     } else if (days <= 7) {
       statusClass = 'warning';
-      statusBadge = `<span class="badge badge-orange">${svgIcon('ic-alert')} متبقي ${days} أيام</span>`;
+      statusBadge = `<span class="badge badge-orange">${svgIcon('ic-alert')} ${tf('debt_remaining_days', { count: days })}</span>`;
     } else {
-      statusBadge = `<span class="badge badge-cyan">متبقي ${days} يوم</span>`;
+      statusBadge = `<span class="badge badge-cyan">${tf('debt_remaining_days', { count: days })}</span>`;
     }
   }
 
@@ -123,18 +126,18 @@ export function debtCardHTML(debt) {
             ${esc(debt.creditor)}
           </div>
           <div class="debt-due">
-            ${debt.dueDate ? 'الاستحقاق: ' + formatDate(debt.dueDate) : 'بدون استحقاق'}
+            ${debt.dueDate ? `${t('debt_due_prefix')}: ${formatDate(debt.dueDate)}` : t('debt_no_due_date')}
           </div>
         </div>
         <div style="text-align:left">
           ${statusBadge}
           <div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
-            <button class="btn btn-ghost btn-icon btn-sm"
-                    onclick="App.openDebtModal('${debt.id}')" title="${t('edit')}">
+            <button class="btn btn-ghost btn-icon btn-sm" data-app-action="edit"
+                    data-item-type="debt" data-item-id="${esc(debt.id)}" title="${esc(t('edit'))}">
               ${svgIcon('ic-edit')}
             </button>
-            <button class="btn btn-danger btn-icon btn-sm"
-                    onclick="App.confirmDelete('debt','${debt.id}')" title="${t('delete')}">
+            <button class="btn btn-danger btn-icon btn-sm" data-app-action="delete"
+                    data-item-type="debt" data-item-id="${esc(debt.id)}" title="${esc(t('delete'))}">
               ${svgIcon('ic-trash')}
             </button>
           </div>
@@ -180,15 +183,21 @@ export function investmentCardHTML(inv) {
             ${esc(inv.name)}
           </div>
           <div style="font-size:11px;color:var(--color-text-muted);margin-top:3px">
-            ${type.label} · ${formatDate(inv.startDate)}
-            ${inv.quantity ? ` · ${inv.quantity} ${inv.type === 'stocks' ? 'سهم' : 'جرام'}` : ''}
+            ${esc(t(type.label))} · ${formatDate(inv.startDate)}
+            ${inv.quantity && (inv.type === 'stocks' || inv.type === 'gold')
+              ? ` · <span class="investment-quantity">${Number(inv.quantity).toLocaleString(t('locale'), { maximumFractionDigits: 2 })} ${esc(t(inv.type === 'stocks' ? 'unit_share' : 'unit_gram'))}</span>`
+              : ''}
           </div>
+          ${inv._marketStatus ? `
+            <div class="investment-market-status" style="font-size:10px;color:var(--color-warning);margin-top:3px">
+              ${t(inv._marketStatus === 'cached' ? 'market_holding_cached' : 'market_holding_unavailable')}
+            </div>` : ''}
         </div>
         <div style="text-align:left">
           <div class="investment-roi ${roi >= 0 ? 'positive' : 'negative'}">
             ${roi >= 0 ? '+' : ''}${formatPercent(roi)}
           </div>
-          <div style="font-size:11px;color:var(--color-text-muted)">العائد</div>
+          <div style="font-size:11px;color:var(--color-text-muted)">${esc(t('investment_return'))}</div>
         </div>
       </div>
       <div class="investment-details">
@@ -211,10 +220,12 @@ export function investmentCardHTML(inv) {
         </div>
       </div>
       <div style="display:flex;gap:6px;margin-top:12px;justify-content:flex-end">
-        <button class="btn btn-ghost btn-sm" onclick="App.openInvestmentModal('${inv.id}')">
+        <button class="btn btn-ghost btn-sm" data-app-action="edit"
+                data-item-type="investment" data-item-id="${esc(inv.id)}">
           ${svgIcon('ic-edit')} ${t('edit')}
         </button>
-        <button class="btn btn-danger btn-sm" onclick="App.confirmDelete('investment','${inv.id}')">
+        <button class="btn btn-danger btn-sm" data-app-action="delete"
+                data-item-type="investment" data-item-id="${esc(inv.id)}">
           ${svgIcon('ic-trash')} ${t('delete')}
         </button>
       </div>
@@ -226,10 +237,10 @@ export function emptyStateHTML(iconId, title, text) {
   return `
     <div class="empty-state">
       <div class="empty-icon">
-        <svg class="icon icon-lg" viewBox="0 0 24 24"><use href="#${iconId}"/></svg>
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><use href="#${esc(iconId)}"/></svg>
       </div>
-      <div class="empty-title">${title}</div>
-      <div class="empty-text">${text}</div>
+      <div class="empty-title">${esc(title)}</div>
+      <div class="empty-text">${esc(text)}</div>
     </div>`;
 }
 
@@ -242,7 +253,7 @@ export function categorySummaryHTML(cat, amt, pct) {
       <div class="budget-category-header">
         <div class="budget-category-name">
           <span class="budget-category-icon" style="color:var(--color-${ck})">${svgIcon(info.iconId)}</span>
-          ${info.label}
+          ${esc(t(info.label))}
         </div>
         <div class="budget-category-amount" style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--color-${ck})">
           ${formatCurrency(amt)}
@@ -251,6 +262,6 @@ export function categorySummaryHTML(cat, amt, pct) {
       <div class="progress-wrap">
         <div class="progress-bar progress-${info.color}" style="width:${pct.toFixed(0)}%"></div>
       </div>
-      <div class="budget-status"><span>${pct.toFixed(1)}% من المصروفات</span></div>
+      <div class="budget-status"><span>${pct.toFixed(1)}% ${t('comp_of_expenses')}</span></div>
     </div>`;
 }

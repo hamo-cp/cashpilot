@@ -17,13 +17,13 @@ export function renderIncome() {
   const total = list.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
 
   set('income-total', formatCurrency(total));
-  set('income-count', list.length + ' مصدر');
+  set('income-count', String(list.length));
 
   const container = document.getElementById('income-list');
   if (!container) return;
 
   if (!list.length) {
-    container.innerHTML = emptyStateHTML('ic-dollar', 'لا يوجد دخل مسجل', 'اضغط + لإضافة مصدر دخل جديد');
+    container.innerHTML = emptyStateHTML('ic-dollar', t('empty_income'), t('empty_income_sub'));
     return;
   }
   const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -57,21 +57,21 @@ export function saveIncome(editingId, onDone) {
   const date   = dateEl?.value           || '';
   const notes  = document.getElementById('inc-notes')?.value.trim() || '';
 
-  if (!name)                        return Toast.show('أدخل اسم مصدر الدخل', 'error');
+  if (!name)                        return Toast.show(t('income_name_required'), 'error');
   if (name.length > 100)            return Toast.show(t('toast_invalid'), 'error');
-  if (!amountEl?.value.trim())      return Toast.show('أدخل المبلغ', 'error');
-  if (isNaN(amount) || amount <= 0) return Toast.show('المبلغ يجب أن يكون رقماً موجباً', 'error');
+  if (!amountEl?.value.trim())      return Toast.show(t('amount_required'), 'error');
+  if (isNaN(amount) || amount <= 0) return Toast.show(t('amount_positive'), 'error');
   if (amount > 999_999_999)         return Toast.show(t('toast_invalid'), 'error');
-  if (!date)                        return Toast.show('أدخل التاريخ', 'error');
+  if (!date)                        return Toast.show(t('date_input_required'), 'error');
 
   const data = { name, amount, source, date, notes };
 
   if (editingId) {
     Finance.updateIncome(editingId, data);
-    Toast.show('تم تعديل الدخل', 'success');
+    Toast.show(t('toast_updated'), 'success');
   } else {
     Finance.addIncome(data);
-    Toast.show('تم إضافة الدخل', 'success');
+    Toast.show(t('toast_added'), 'success');
   }
   onDone?.();
 }

@@ -19,16 +19,18 @@ import { printSummary }                 from './services/print.js';
 import { getState, setState }           from './core/state.js';
 import { navigateTo, bindNavButtons,
          bindCenterButton, setupFilters,
-         bindSwipe }                    from './ui/nav.js';
+         bindSwipe, syncFilterChipSelection,
+         focusElementSafely, focusPageDestination } from './ui/nav.js';
 import { bindModalEvents, openModal,
          closeModal, openConfirm,
          cancelConfirm, executeConfirm } from './ui/modal.js';
+import { bindPrivacyMode, syncPrivacyMode } from './ui/privacy.js';
+import { bindPWAInstall } from './ui/install.js';
 import * as Toast                          from './ui/toast.js';
 import { filterTransactions,
          bindSearchInput,
          renderTransactions }          from './pages/transactions.js';
 import * as Notif                       from './services/notifications.js';
-import { generateInsights }             from './services/ai-advisor.js';
 
 // Pages
 import { renderDashboard }    from './pages/dashboard.js';
@@ -67,8 +69,10 @@ function renderPage(page) {
     case 'budget':        renderBudget();  animateProgressBars();   break;
     case 'analytics':     renderAnalytics(); animateProgressBars(); break;
     case 'transactions': renderTransactions();                    break;
+    case 'notifications': refreshNotifUI();                        break;
     case 'more':         /* static — no render */ syncMorePage();  break;
   }
+  syncPrivacyMode();
 }
 
 /* ════════════════════════════════════════
@@ -96,7 +100,7 @@ function syncMorePage() {
   const label      = document.getElementById('moreThemeLabel');
   const moreIcon   = document.getElementById('moreThemeIcon');
   if (toggle) toggle.classList.toggle('active', !isDark);
-  if (label)  label.textContent = isDark ? 'الوضع الداكن' : 'الوضع الفاتح';
+  if (label)  label.textContent = t(isDark ? 'theme_dark' : 'theme_light');
   if (moreIcon) moreIcon.querySelector('use')
     .setAttribute('href', isDark ? '#ic-moon' : '#ic-sun');
 }
@@ -109,7 +113,7 @@ function handleDelete(type, id) {
     case 'investment':   Finance.deleteInvestment(id);   break;
     case 'subscription': Finance.deleteSubscription(id); break;
   }
-  Toast.show('تم الحذف', 'success');
+  Toast.show(t('toast_deleted'), 'success');
   renderPage(getState().currentPage);
 }
 
@@ -144,7 +148,8 @@ function bindNetworkWatcher() {
     const b       = document.createElement('div');
     b.id          = 'offlineBanner';
     b.className   = 'offline-banner';
-    b.textContent = 'لا يوجد اتصال بالإنترنت — التطبيق يعمل بشكل كامل';
+    b.dataset.i18n = 'offline_banner';
+    b.textContent = t('offline_banner');
     document.body.appendChild(b);
   }
   function hideBanner() {
@@ -167,9 +172,10 @@ function bindMorePageEvents() {
   });
 
   document.getElementById('moreLangBtn')?.addEventListener('click', () => {
-    const newLang = toggleLang();
+    Toast.clear();
+    toggleLang();
     Toast.show(t('toast_lang'));
-    translatePage();
+    refreshNotifUI();
     renderPage(getState().currentPage);
   });
 
@@ -186,30 +192,6 @@ function bindMorePageEvents() {
 
   // Print
   document.getElementById('morePrintBtn')?.addEventListener('click', printSummary);
-}
-
-function bindPWAInstall() {
-  let deferredPrompt;
-  const btn = document.getElementById('installBtn');
-  if (!btn) return;
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    btn.style.display = 'flex';
-  });
-
-  btn.addEventListener('click', () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          btn.style.display = 'none';
-        }
-        deferredPrompt = null;
-      });
-    }
-  });
 }
 
 /* ════════════════════════════════════════
@@ -234,13 +216,13 @@ function refreshNotifUI() {
   const status = Notif.getPermissionStatus();
   if (pushBtn) {
     if (status === 'granted') {
-      pushBtn.textContent = 'مفعل ✅';
+      pushBtn.textContent = t('notif_push_enabled');
       pushBtn.classList.add('active');
     } else if (status === 'denied') {
-      pushBtn.textContent = 'محظور ❌';
+      pushBtn.textContent = t('notif_push_blocked');
       pushBtn.classList.remove('active');
     } else {
-      pushBtn.textContent = 'تفعيل';
+      pushBtn.textContent = t('notif_push_enable');
       pushBtn.classList.remove('active');
     }
   }
@@ -294,15 +276,15 @@ function promptNotifPermission() {
       animation:slideUp 0.3s var(--ease-out);
     `;
     toast.innerHTML = `
-      <div style="font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px">
+      <div data-i18n="notif_prompt_title" style="font-size:13px;font-weight:700;color:var(--color-text-primary);margin-bottom:6px">
         ${t('notif_prompt_title')}
       </div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">
+      <div data-i18n="notif_prompt_body" style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">
         ${t('notif_prompt_body')}
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button id="notif-prompt-later" style="background:none;border:1px solid var(--color-border);color:var(--color-text-muted);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:12px">${t('notif_prompt_later')}</button>
-        <button id="notif-prompt-enable" style="background:var(--color-brand);border:none;color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:12px;font-weight:700">${t('notif_prompt_enable')}</button>
+        <button id="notif-prompt-later" data-i18n="notif_prompt_later" style="background:none;border:1px solid var(--color-border);color:var(--color-text-muted);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:12px">${t('notif_prompt_later')}</button>
+        <button id="notif-prompt-enable" data-i18n="notif_prompt_enable" style="background:var(--color-brand);border:none;color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-main);font-size:12px;font-weight:700">${t('notif_prompt_enable')}</button>
       </div>
     `;
     document.body.appendChild(toast);
@@ -338,6 +320,48 @@ function withSaveGuard(fn) {
   };
 }
 
+/**
+ * Bind actions emitted by dynamic list renderers without embedding data inside
+ * executable inline handlers. Item identifiers remain inert dataset values.
+ */
+function bindDynamicActions() {
+  document.addEventListener('click', (event) => {
+    const target = event.target?.closest?.('[data-app-action]');
+    if (!target) return;
+
+    const action = target.dataset.appAction;
+    const type   = target.dataset.itemType || '';
+    const id     = target.dataset.itemId || '';
+
+    if (action === 'edit') {
+      const openers = {
+        income:       App.openIncomeModal,
+        expense:      App.openExpenseModal,
+        debt:         App.openDebtModal,
+        investment:   App.openInvestmentModal,
+        subscription: App.openSubscriptionModal,
+      };
+      openers[type]?.(id);
+      return;
+    }
+
+    if (action === 'delete' && ['income', 'expense', 'debt', 'investment', 'subscription'].includes(type)) {
+      App.confirmDelete(type, id);
+      return;
+    }
+
+    if (action === 'open-notification') {
+      App.openNotif(id, target.dataset.link || '');
+      return;
+    }
+
+    if (action === 'delete-notification') {
+      event.stopPropagation();
+      App.deleteNotif(id);
+    }
+  });
+}
+
 export const App = {
   // التنقل
   navigateTo: (page) => navigateTo(page, renderPage),
@@ -348,39 +372,9 @@ export const App = {
   openDebtModal:       (id) => { setState({ editingId: id || null }); openDebtModal(id); openModal('debtModal'); },
   openInvestmentModal: (id) => { setState({ editingId: id || null }); openInvestmentModal(id); openModal('investmentModal'); },
   refreshMarket,
-  openSubscriptionModal: (id) => { setState({ editingId: id || null }); openSubscriptionModal(id); openModal('subscriptionModal'); },
+  openSubscriptionModal: (id) => { setState({ editingId: id || null }); openSubscriptionModal(id); },
   openModal,
   closeModal,
-  // AI Advisor
-  generateAIInsights: async () => {
-    const btn = document.getElementById('aiGenerateBtn');
-    const resultDiv = document.getElementById('aiInsightsResult');
-    if (!btn || !resultDiv) return;
-
-    try {
-      btn.disabled = true;
-      btn.innerHTML = 'جاري التحليل <svg class="icon icon-sm spin"><use href="#ic-refresh"/></svg>';
-      resultDiv.style.display = 'block';
-      resultDiv.innerHTML = '<div style="text-align:center; padding:10px;">جاري التواصل مع الذكاء الاصطناعي...</div>';
-
-      const insights = await generateInsights();
-      
-      // Simple markdown parser for **bold** and \n lists
-      const html = insights
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/\n/g, '<br>');
-
-      resultDiv.innerHTML = html;
-    } catch (err) {
-      resultDiv.innerHTML = `<div style="color:var(--color-danger);">سبب الخطأ: ${err.message}</div>`;
-      Toast.show('خطأ في الاتصال', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = 'اطلب نصيحة';
-    }
-  },
-
   // Save — محمية من double-submit
   saveIncome:     withSaveGuard(() => saveIncome(getState().editingId,     () => { closeModal(); renderPage(getState().currentPage); })),
   saveExpense:    withSaveGuard(() => saveExpense(getState().editingId,    () => { closeModal(); renderPage(getState().currentPage); })),
@@ -415,12 +409,12 @@ export const App = {
   async togglePushNotifications() {
     const current = Notif.getPermissionStatus();
     if (current === 'granted') {
-      Toast.show('الإشعارات مفعلة بالفعل', 'success');
+      Toast.show(t('notif_already_enabled'), 'success');
     } else if (current === 'denied') {
-      Toast.show('الرجاء السماح بالإشعارات من إعدادات المتصفح', 'error');
+      Toast.show(t('notif_allow_browser'), 'error');
     } else {
       const result = await Notif.requestNativePermission();
-      Toast.show(result === 'granted' ? 'تم التفعيل بنجاح' : 'تم الرفض', result === 'granted' ? 'success' : 'error');
+      Toast.show(t(result === 'granted' ? 'notif_enabled' : 'notif_rejected'), result === 'granted' ? 'success' : 'error');
     }
     refreshNotifUI();
   },
@@ -436,16 +430,27 @@ export const App = {
       notifSmartInsights: smartInsights,
       notifWeeklySummary: weeklySummary,
     });
-    Toast.show('تم حفظ إعدادات الإشعارات', 'success');
+    Toast.show(t('notif_settings_saved'), 'success');
   },
   openNotif(id, link) {
     Notif.markRead(id);
     refreshNotifUI();
-    if (link) navigateTo(link, renderPage);
+    if (['dashboard', 'income', 'expenses', 'debts', 'investments', 'subscriptions', 'budget', 'analytics', 'transactions', 'more'].includes(link)) {
+      navigateTo(link, renderPage);
+      focusPageDestination(link);
+    } else {
+      Notif.focusNotificationOpenControl(id)
+        || focusPageDestination('notifications');
+    }
   },
   deleteNotif(id) {
+    const controlsBefore = [...document.querySelectorAll('[data-app-action="open-notification"]')];
+    const deletedIndex = controlsBefore.findIndex(control => control.dataset.itemId === id);
     Notif.deleteNotification(id);
     refreshNotifUI();
+    const controlsAfter = [...document.querySelectorAll('[data-app-action="open-notification"]')];
+    focusElementSafely(Notif.notificationControlAfterDelete(controlsAfter, deletedIndex))
+      || focusPageDestination('notifications');
   },
 };
 
@@ -463,17 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyGlobalDefaults();
 
     // Privacy Toggle
-    document.getElementById('privacyBtn')?.addEventListener('click', () => {
-      document.body.classList.toggle('privacy-mode');
-      const icon = document.getElementById('privacyIcon');
-      if (icon) {
-        if (document.body.classList.contains('privacy-mode')) {
-          icon.innerHTML = '<use href="#ic-eye-off"/>';
-        } else {
-          icon.innerHTML = '<use href="#ic-eye"/>';
-        }
-      }
-    });
+    bindPrivacyMode();
 
     // 3. Theme
     const { theme } = getSettings();
@@ -488,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. Modals & search
     bindModalEvents();
     bindSearchInput();
+    bindDynamicActions();
 
     // 6. More page
     bindMorePageEvents();
@@ -507,8 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 11. filterTx global
     window.filterTx = (type, btn) => {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
+      syncFilterChipSelection(btn);
       filterTransactions(type);
     };
 

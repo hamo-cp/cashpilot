@@ -8,7 +8,8 @@
 import * as Finance from './finance.js';
 import * as Notif   from './notifications.js';
 import * as DB      from '../storage/db.js';
-import { today, daysUntil, formatCurrency } from '../core/utils.js';
+import { today, daysUntil } from '../core/utils.js';
+import { BUDGET_CATEGORIES } from '../core/constants.js';
 
 // مفتاح لحفظ تاريخ آخر تحليل ذكي لمنع التكرار المزعج (أسبوعي مثلاً)
 const LAST_SMART_ANALYSIS = 'mz_last_smart_analysis';
@@ -80,8 +81,9 @@ function analyzeDebts() {
     if (days === 0) {
       Notif.addNotification({
         type:     'debt_due',
-        title:    '⚠️ دين مستحق اليوم',
-        body:     `الدين لصالح: ${debt.creditor} بقيمة ${formatCurrency(debt.amount - debt.paid)} مستحق اليوم!`,
+        titleKey: 'smart_debt_due_today_title',
+        bodyKey:  'smart_debt_due_today_body',
+        params:   { creditor: debt.creditor, amount: debt.amount - debt.paid },
         icon:     'ic-landmark',
         severity: 'danger',
         link:     'debts',
@@ -89,8 +91,9 @@ function analyzeDebts() {
     } else if (days > 0 && days <= 3) {
       Notif.addNotification({
         type:     'debt_due',
-        title:    '📅 اقترب موعد سداد دين',
-        body:     `تذكير: لديك دين لصالح ${debt.creditor} يستحق خلال ${days} أيام.`,
+        titleKey: 'smart_debt_due_soon_title',
+        bodyKey:  'smart_debt_due_soon_body',
+        params:   { creditor: debt.creditor, days },
         icon:     'ic-landmark',
         severity: 'warning',
         link:     'debts',
@@ -103,8 +106,8 @@ function analyzeDebts() {
   if (monthIncome > 0 && totalDebtAmount > monthIncome * 0.5) {
     Notif.addNotification({
       type:     'insight',
-      title:    '🚨 تحذير: مستوى ديون مرتفع',
-      body:     'ديونك الحالية تتجاوز 50% من دخلك الشهري. حاول التركيز على سداد الديون قبل زيادة النفقات الترفيهية.',
+      titleKey: 'smart_debt_high_title',
+      bodyKey:  'smart_debt_high_body',
       icon:     'ic-alert',
       severity: 'danger',
       link:     'debts',
@@ -122,8 +125,8 @@ function analyzeBudget(summary, month, year) {
   if (spendRate >= 100) {
     Notif.addNotification({
       type:     'budget_over',
-      title:    '🔴 ميزانية مخترقة!',
-      body:     'لقد تجاوزت إنفاقك حد الدخل المتاح لهذا الشهر. كل قرش تنفقه الآن يعتبر عجزاً.',
+      titleKey: 'smart_budget_over_title',
+      bodyKey:  'smart_budget_over_body',
       icon:     'ic-alert',
       severity: 'danger',
       link:     'budget',
@@ -131,8 +134,9 @@ function analyzeBudget(summary, month, year) {
   } else if (spendRate >= 85) {
     Notif.addNotification({
       type:     'budget_warning',
-      title:    '🟡 إنذار ميزانية عامة',
-      body:     `أنفقت ${spendRate.toFixed(0)}% من دخلك. حاول تقنين المصروفات حتى نهاية الشهر.`,
+      titleKey: 'smart_budget_warn_title',
+      bodyKey:  'smart_budget_warn_body',
+      params:   { rate: spendRate.toFixed(0) },
       icon:     'ic-alert',
       severity: 'warning',
       link:     'budget',
@@ -142,17 +146,6 @@ function analyzeBudget(summary, month, year) {
   // فحص الميزانيات المخصصة لكل فئة
   const categoryLimits = Finance.getBudget();
   const categorySpent = Finance.expensesByCategory(month, year);
-  const BUDGET_CATEGORIES = [
-    { key: 'food', label: 'الطعام' },
-    { key: 'transport', label: 'المواصلات' },
-    { key: 'education', label: 'التعليم' },
-    { key: 'health', label: 'الصحة' },
-    { key: 'entertainment', label: 'الترفيه' },
-    { key: 'shopping', label: 'التسوق' },
-    { key: 'bills', label: 'الفواتير' },
-    { key: 'internet', label: 'الإنترنت' }
-  ];
-
   BUDGET_CATEGORIES.forEach(cat => {
     const limit = parseFloat(categoryLimits[cat.key]) || 0;
     const spent = categorySpent[cat.key] || 0;
@@ -162,8 +155,9 @@ function analyzeBudget(summary, month, year) {
       if (pct >= 100) {
         Notif.addNotification({
           type:     'budget_over',
-          title:    `🔴 تجاوزت ميزانية ${cat.label}`,
-          body:     `لقد تجاوزت الميزانية المخصصة لـ (${cat.label}). أنفقت ${formatCurrency(spent)} من أصل ${formatCurrency(limit)}.`,
+          titleKey: 'smart_category_over_title',
+          bodyKey:  'smart_category_over_body',
+          params:   { categoryKey: cat.label, spent, limit },
           icon:     'ic-alert',
           severity: 'danger',
           link:     'budget',
@@ -171,8 +165,9 @@ function analyzeBudget(summary, month, year) {
       } else if (pct >= 85) {
         Notif.addNotification({
           type:     'budget_warning',
-          title:    `🟡 اقتربت من حد ${cat.label}`,
-          body:     `استهلكت ${pct.toFixed(0)}% من ميزانية ${cat.label}. المتبقي ${formatCurrency(limit - spent)} فقط!`,
+          titleKey: 'smart_category_warn_title',
+          bodyKey:  'smart_category_warn_body',
+          params:   { categoryKey: cat.label, rate: pct.toFixed(0), remaining: limit - spent },
           icon:     'ic-alert',
           severity: 'warning',
           link:     'budget',
@@ -211,8 +206,9 @@ function analyzeSubscriptions() {
     if (diffDays === 0) {
       Notif.addNotification({
         type:     'system',
-        title:    '🔔 تجديد اشتراك اليوم',
-        body:     `اشتراكك في (${sub.name}) يستحق التجديد اليوم بقيمة ${formatCurrency(sub.amount)}.`,
+        titleKey: 'smart_subscription_due_title',
+        bodyKey:  'smart_subscription_due_body',
+        params:   { name: sub.name, amount: Number(sub.amount) || 0 },
         icon:     'ic-clock',
         severity: 'danger',
         link:     'subscriptions',
@@ -220,8 +216,9 @@ function analyzeSubscriptions() {
     } else if (diffDays > 0 && diffDays <= 3) {
       Notif.addNotification({
         type:     'system',
-        title:    '📅 اقترب تجديد اشتراك',
-        body:     `تذكير: اشتراك (${sub.name}) يتجدد خلال ${diffDays} أيام بقيمة ${formatCurrency(sub.amount)}.`,
+        titleKey: 'smart_subscription_soon_title',
+        bodyKey:  'smart_subscription_soon_body',
+        params:   { name: sub.name, days: diffDays, amount: Number(sub.amount) || 0 },
         icon:     'ic-clock',
         severity: 'warning',
         link:     'subscriptions',
@@ -244,8 +241,9 @@ function analyzeInsights(summary) {
   if (savingRate < 20 && savingRate > 0) {
     Notif.addNotification({
       type:     'insight',
-      title:    '💡 نصيحة ذكية: قاعدة 50/30/20',
-      body:     `فائضك الحالي هو ${savingRate.toFixed(1)}%. الخبراء ينصحون بادخار أو استثمار 20% على الأقل من الدخل لضمان مستقبل مالي مستقر.`,
+      titleKey: 'smart_saving_tip_title',
+      bodyKey:  'smart_saving_tip_body',
+      params:   { rate: savingRate.toFixed(1) },
       icon:     'ic-trending-up',
       severity: 'info',
       link:     'analytics',
@@ -253,8 +251,9 @@ function analyzeInsights(summary) {
   } else if (savingRate >= 20) {
     Notif.addNotification({
       type:     'insight',
-      title:    '🌟 أداء مالي ممتاز!',
-      body:     `أنت بطل! لقد وفرت ${savingRate.toFixed(1)}% من دخلك. أنت على الطريق الصحيح للحرية المالية.`,
+      titleKey: 'smart_saving_success_title',
+      bodyKey:  'smart_saving_success_body',
+      params:   { rate: savingRate.toFixed(1) },
       icon:     'ic-star',
       severity: 'success',
       link:     'analytics',
@@ -265,8 +264,8 @@ function analyzeInsights(summary) {
   if (savingRate > 15 && investmentsTotal === 0) {
     Notif.addNotification({
       type:     'insight',
-      title:    '📈 اجعل أموالك تعمل لأجلك',
-      body:     'رائع أنك تدخر! لكن هل فكرت في الاستثمار؟ الاستثمار يحمي أموالك من التضخم ويضاعف ثروتك بمرور الوقت.',
+      titleKey: 'smart_invest_tip_title',
+      bodyKey:  'smart_invest_tip_body',
       icon:     'ic-trending-up',
       severity: 'info',
       link:     'investments',
@@ -280,8 +279,9 @@ function analyzeInsights(summary) {
 function generateWeeklySummary(summary) {
   Notif.addNotification({
     type:     'insight',
-    title:    '📊 ملخصك الأسبوعي',
-    body:     `أنفقت هذا الشهر إجمالي ${formatCurrency(summary.expenses)}. اضغط هنا لرؤية تحليلاتك والتصنيفات التي استهلكت ميزانيتك.`,
+    titleKey: 'smart_weekly_title',
+    bodyKey:  'smart_weekly_body',
+    params:   { amount: summary.expenses },
     icon:     'ic-pie-chart',
     severity: 'info',
     link:     'analytics',

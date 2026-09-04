@@ -9,6 +9,14 @@ const MAX_TOASTS = 3;
 let _lastMsg  = '';
 let _lastTime = 0;
 
+export function clear() {
+  const container = globalThis.document?.getElementById?.('toastContainer');
+  if (container?.replaceChildren) container.replaceChildren();
+  else while (container?.firstChild) container.firstChild.remove();
+  _lastMsg = '';
+  _lastTime = 0;
+}
+
 /**
  * @param {string} message
  * @param {'success'|'error'|'info'|'warning'} type
@@ -31,7 +39,10 @@ export function show(message, type = 'info', duration = 3000) {
 
   const toast     = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${ICONS[type] || ''}</span> ${message}`;
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  const icon = document.createElement('span');
+  icon.textContent = ICONS[type] || '';
+  toast.append(icon, document.createTextNode(` ${String(message ?? '')}`));
   container.appendChild(toast);
 
   setTimeout(() => {

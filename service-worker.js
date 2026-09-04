@@ -1,9 +1,6 @@
-/* ============================================================
-   Service Worker — ميزانيتي PWA
-   يتيح العمل الكامل بدون اتصال إنترنت
-   ============================================================ */
+/* CashPilot service worker: local, explicit, same-origin offline cache. */
 
-const CACHE_NAME = 'cashpilot-v7.3';
+const CACHE_NAME = 'cashpilot-v8-security';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -13,18 +10,24 @@ const STATIC_ASSETS = [
   './files/icon-512.png',
   './files/icon-192-maskable.png',
   './files/icon-512-maskable.png',
+  './vendor/chart.js-4.4.0/chart.umd.js',
   './src/main.js',
   './src/core/constants.js',
+  './src/core/i18n.js',
   './src/core/state.js',
   './src/core/utils.js',
   './src/storage/db.js',
   './src/services/finance.js',
-  './src/services/demo.js',
   './src/services/backup.js',
   './src/services/print.js',
+  './src/services/market.js',
+  './src/services/notifications.js',
+  './src/services/smart-engine.js',
   './src/ui/toast.js',
   './src/ui/modal.js',
   './src/ui/nav.js',
+  './src/ui/install.js',
+  './src/ui/privacy.js',
   './src/ui/components.js',
   './src/charts/chartConfig.js',
   './src/charts/charts.js',
@@ -33,122 +36,110 @@ const STATIC_ASSETS = [
   './src/pages/expenses.js',
   './src/pages/debts.js',
   './src/pages/investments.js',
+  './src/pages/subscriptions.js',
   './src/pages/budget.js',
   './src/pages/analytics.js',
   './src/pages/transactions.js',
-  './src/services/notifications.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
-  'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap'
 ];
 
-/* ── تثبيت Service Worker وتخزين الأصول ── */
+const STATIC_URLS = new Set(STATIC_ASSETS.map(path => {
+  const url = new URL(path, self.location.href);
+  url.search = '';
+  return url.href;
+}));
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching static assets...');
-      return cache.addAll(STATIC_ASSETS.map(url => {
-        return new Request(url, { mode: 'no-cors' });
-      })).catch(err => {
-        console.warn('[SW] Some assets failed to cache:', err);
-      });
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting()),
   );
 });
 
-/* ── تفعيل Worker وحذف الكاش القديم ── */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter(name => name !== CACHE_NAME)
-          .map(name => {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
-          })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys()
+      .then(names => Promise.all(
+        names
+          .filter(name => name.startsWith('cashpilot-') && name !== CACHE_NAME)
+          .map(name => caches.delete(name)),
+      ))
+      .then(() => self.clients.claim()),
   );
 });
 
-/* ── استراتيجية Cache First مع Fallback ── */
 self.addEventListener('fetch', (event) => {
-  // تجاهل طلبات chrome-extension وغيرها
-  if (!event.request.url.startsWith('http')) return;
+  const request = event.request;
+  if (request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // تحديث الكاش في الخلفية
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, networkResponse.clone());
-            });
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(async response => {
+          if (response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put('./index.html', response.clone());
           }
-        }).catch(() => {});
-        return cachedResponse;
-      }
+          return response;
+        })
+        .catch(() => caches.match('./index.html')),
+    );
+    return;
+  }
 
-      // محاولة جلب من الشبكة
-      return fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Fallback للملفات الرئيسية
-        if (event.request.destination === 'document') {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
+  const normalized = new URL(request.url);
+  normalized.search = '';
+  if (!STATIC_URLS.has(normalized.href)) return;
+
+  const refreshed = fetch(request).then(async response => {
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  });
+  event.waitUntil(refreshed.then(() => undefined).catch(() => undefined));
+  event.respondWith(caches.match(request, { ignoreSearch: true }).then(cached => cached || refreshed));
 });
 
-/* ── استقبال رسائل من التطبيق ── */
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data?.type === 'GET_VERSION') {
+    event.ports[0]?.postMessage({ version: CACHE_NAME });
   }
-  if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: CACHE_NAME });
-  }
-  // إرسال إشعار أصلي من خلال الـ Service Worker
-  if (event.data && event.data.type === 'SEND_NOTIFICATION') {
+  if (event.data?.type === 'SEND_NOTIFICATION') {
     const { title, body, tag, link } = event.data;
-    self.registration.showNotification(title, {
-      body:    body || '',
-      icon:    './files/icon-192.png',
-      badge:   './files/icon-192-maskable.png',
-      tag:     tag  || 'cashpilot-notif',
-      data:    { link: link || null },
+    self.registration.showNotification(String(title || ''), {
+      body: String(body || ''),
+      icon: './files/icon-192.png',
+      badge: './files/icon-192-maskable.png',
+      tag: String(tag || 'cashpilot-notif'),
+      data: { link: typeof link === 'string' ? link : null },
       vibrate: [200, 100, 200],
       requireInteraction: false,
-    }).catch(err => console.warn('[SW] showNotification failed:', err));
+    }).catch(error => console.warn('[SW] showNotification failed:', error));
   }
 });
 
-/* ── عند النقر على الإشعار من شريط الإشعارات ── */
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetLink = event.notification.data?.link || null;
+  const targetLink = typeof event.notification.data?.link === 'string'
+    ? event.notification.data.link
+    : null;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      // إذا كان التطبيق مفتوحاً → أعد التركيز عليه
       for (const client of clientList) {
         if (client.url.includes('index.html') || client.url.endsWith('/')) {
           client.focus();
           if (targetLink) client.postMessage({ type: 'NAVIGATE_TO', page: targetLink });
-          return;
+          return undefined;
         }
       }
-      // إذا لم يكن مفتوحاً → افتح نافذة جديدة
       return clients.openWindow('./' + (targetLink ? '#' + targetLink : ''));
-    })
+    }),
   );
 });

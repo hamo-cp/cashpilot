@@ -10,7 +10,8 @@
  */
 
 import * as DB        from '../storage/db.js';
-import { t }          from '../core/i18n.js';
+import { t, tf }      from '../core/i18n.js';
+import { esc, formatCurrency, today } from '../core/utils.js';
 import * as Finance   from './finance.js';
 import { runSmartEngine } from './smart-engine.js';
 
@@ -21,6 +22,9 @@ const NOTIF_KEY       = 'mz_notifications';
 const LAST_CHECK_KEY  = 'mz_notif_last_check';
 const PERMISSION_KEY  = 'mz_notif_permission_asked';
 const MAX_NOTIFS      = 50; // أقصى عدد للإشعارات المحفوظة
+const NOTIFICATION_TYPES = new Set(['debt_due', 'budget_warning', 'budget_over', 'insight', 'system']);
+const NOTIFICATION_SEVERITIES = new Set(['info', 'warning', 'danger', 'success']);
+const NOTIFICATION_LINKS = new Set(['dashboard', 'income', 'expenses', 'debts', 'investments', 'subscriptions', 'budget', 'analytics', 'transactions', 'more']);
 
 /* ══════════════════════════════════════
    Types & Helpers
@@ -43,14 +47,57 @@ function uid() {
   return 'notif_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
 }
 
-function today() {
-  return new Date().toISOString().slice(0, 10);
+function normalizeMessageParams(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).slice(0, 20).flatMap(([key, param]) => {
+    if (!/^[a-zA-Z0-9_]+$/.test(key)) return [];
+    if (typeof param === 'number' && Number.isFinite(param)) return [[key, param]];
+    if (typeof param === 'string') return [[key, param.slice(0, 1_000)]];
+    return [];
+  }));
 }
 
-function daysUntil(dateStr) {
-  if (!dateStr) return Infinity;
-  const diff = new Date(dateStr) - new Date(today());
-  return Math.ceil(diff / 86_400_000);
+function messageKey(value) {
+  const key = String(value || '');
+  return /^[a-z0-9_]{1,100}$/.test(key) ? key : '';
+}
+
+function displayMessageParams(params) {
+  const currencyParams = new Set(['amount', 'spent', 'limit', 'remaining']);
+  const output = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (key === 'categoryKey') {
+      const translationKey = messageKey(value);
+      output.category = translationKey ? t(translationKey) : '';
+    } else {
+      output[key] = currencyParams.has(key) && typeof value === 'number'
+        ? formatCurrency(value)
+        : value;
+    }
+  }
+  return output;
+}
+
+function normalizeNotification(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const createdAt = new Date(value.createdAt);
+  const titleKey = messageKey(value.titleKey);
+  const bodyKey = messageKey(value.bodyKey);
+  const params = normalizeMessageParams(value.params);
+  return {
+    id:        String(value.id || uid()).slice(0, 100),
+    type:      NOTIFICATION_TYPES.has(value.type) ? value.type : 'system',
+    title:     String(value.title ?? '').slice(0, 200),
+    body:      String(value.body ?? '').slice(0, 1000),
+    ...(titleKey ? { titleKey } : {}),
+    ...(bodyKey ? { bodyKey } : {}),
+    ...((titleKey || bodyKey) ? { params } : {}),
+    icon:      /^ic-[a-z0-9-]+$/.test(String(value.icon || '')) ? String(value.icon) : 'ic-bell',
+    severity:  NOTIFICATION_SEVERITIES.has(value.severity) ? value.severity : 'info',
+    read:      value.read === true,
+    createdAt: Number.isNaN(createdAt.getTime()) ? new Date().toISOString() : createdAt.toISOString(),
+    link:      NOTIFICATION_LINKS.has(value.link) ? value.link : null,
+  };
 }
 
 /* ══════════════════════════════════════
@@ -61,7 +108,16 @@ function daysUntil(dateStr) {
 export function getNotifications() {
   const raw = DB.get(NOTIF_KEY);
   if (!Array.isArray(raw)) return [];
-  return raw.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  return raw.map(normalizeNotification).filter(Boolean)
+    .map(notif => {
+      const params = displayMessageParams(notif.params || {});
+      return {
+        ...notif,
+        title: notif.titleKey ? tf(notif.titleKey, params) : notif.title,
+        body: notif.bodyKey ? tf(notif.bodyKey, params) : notif.body,
+      };
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
 /** عدد الإشعارات غير المقروءة */
@@ -71,25 +127,30 @@ export function getUnreadCount() {
 
 /** إضافة إشعار جديد */
 export function addNotification(data) {
-  const notifs = DB.get(NOTIF_KEY) || [];
-  const notif = {
+  const notifs = getNotifications();
+  const params = normalizeMessageParams(data.params);
+  const displayParams = displayMessageParams(params);
+  const notif = normalizeNotification({
     id:        uid(),
     type:      data.type      || 'system',
-    title:     data.title     || '',
-    body:      data.body      || '',
+    title:     data.title ?? (data.titleKey ? tf(data.titleKey, displayParams) : ''),
+    body:      data.body ?? (data.bodyKey ? tf(data.bodyKey, displayParams) : ''),
+    titleKey:  data.titleKey,
+    bodyKey:   data.bodyKey,
+    params,
     icon:      data.icon      || 'ic-bell',
     severity:  data.severity  || 'info',
     read:      false,
     createdAt: new Date().toISOString(),
     link:      data.link      || null,
-  };
+  });
 
   // تجنب تكرار نفس الإشعار في نفس اليوم (بناءً على type + link)
   const todayStr = today();
   const duplicate = notifs.find(n =>
     n.type === notif.type &&
     n.link === notif.link &&
-    n.createdAt.startsWith(todayStr)
+    today(new Date(n.createdAt)) === todayStr
   );
   if (duplicate) return null;
 
@@ -102,7 +163,7 @@ export function addNotification(data) {
 
 /** تعليم إشعار واحد كمقروء */
 export function markRead(id) {
-  const notifs = DB.get(NOTIF_KEY) || [];
+  const notifs = getNotifications();
   const idx = notifs.findIndex(n => n.id === id);
   if (idx !== -1) {
     notifs[idx].read = true;
@@ -112,7 +173,7 @@ export function markRead(id) {
 
 /** تعليم جميع الإشعارات كمقروءة */
 export function markAllRead() {
-  const notifs = DB.get(NOTIF_KEY) || [];
+  const notifs = getNotifications();
   notifs.forEach(n => { n.read = true; });
   DB.set(NOTIF_KEY, notifs);
 }
@@ -124,7 +185,7 @@ export function clearNotifications() {
 
 /** حذف إشعار واحد */
 export function deleteNotification(id) {
-  const notifs = DB.get(NOTIF_KEY) || [];
+  const notifs = getNotifications();
   DB.set(NOTIF_KEY, notifs.filter(n => n.id !== id));
 }
 
@@ -206,16 +267,14 @@ export async function runSmartTriggers() {
     localStorage.setItem(LAST_CHECK_KEY, today());
 
     const hour = now.getHours();
-    const greet = hour < 12
-      ? (t('greeting_am') || 'صباح الخير')
-      : hour < 18
-        ? (t('greeting_pm') || 'مساء الخير')
-        : (t('greeting_eve') || 'مساء النور');
+    const titleKey = hour < 12
+      ? 'notif_greeting_am_title'
+      : hour < 18 ? 'notif_greeting_pm_title' : 'notif_greeting_eve_title';
 
     addNotification({
       type:     'system',
-      title:    greet + ' 👋',
-      body:     t('notif_daily_summary') || 'افتح التطبيق لمراجعة وضعك المالي اليوم.',
+      titleKey,
+      bodyKey:  'notif_daily_summary',
       icon:     'ic-home',
       severity: 'info',
       link:     'dashboard',
@@ -237,21 +296,50 @@ export function notifItemHTML(notif) {
   }[notif.severity] || 'var(--color-brand)';
 
   const timeAgo = formatTimeAgo(notif.createdAt);
+  const deleteLabel = t('delete');
 
   return `
-    <div class="notif-item ${notif.read ? '' : 'unread'}" 
-         onclick="App.openNotif('${notif.id}', '${notif.link || ''}')"
-         id="notif-item-${notif.id}">
-      <div class="notif-item-dot" style="background:${severityColor}"></div>
-      <div class="notif-item-content">
-        <div class="notif-item-title">${notif.title}</div>
-        <div class="notif-item-body">${notif.body}</div>
-        <div class="notif-item-time">${timeAgo}</div>
-      </div>
-      <button class="notif-item-delete" onclick="event.stopPropagation();App.deleteNotif('${notif.id}')" title="حذف">
+    <div class="notif-item ${notif.read ? '' : 'unread'}" id="notif-item-${esc(notif.id)}">
+      <button type="button" class="notif-item-open" data-app-action="open-notification"
+              data-item-id="${esc(notif.id)}" data-link="${esc(notif.link || '')}">
+        <span class="notif-item-dot" aria-hidden="true" style="background:${severityColor}"></span>
+        <span class="notif-item-content">
+          <span class="notif-item-title">${esc(notif.title)}</span>
+          <span class="notif-item-body">${esc(notif.body)}</span>
+          <span class="notif-item-time">${esc(timeAgo)}</span>
+        </span>
+      </button>
+      <button type="button" class="notif-item-delete" data-app-action="delete-notification"
+              data-item-id="${esc(notif.id)}" aria-label="${esc(`${deleteLabel}: ${notif.title}`)}"
+              title="${esc(deleteLabel)}">
         <svg class="icon icon-xs" viewBox="0 0 24 24"><use href="#ic-x"/></svg>
       </button>
     </div>`;
+}
+
+/** إيجاد زر فتح إشعار بمقارنة dataset، دون إدخال المعرّف داخل CSS selector. */
+export function findNotificationOpenControl(id, root = document) {
+  return [...root.querySelectorAll("[data-app-action='open-notification']")]
+    .find(control => control.dataset.itemId === id) || null;
+}
+
+/** إعادة التركيز إلى نسخة زر الإشعار التي أُنشئت بعد تحديث القائمة. */
+export function focusNotificationOpenControl(id, root = document) {
+  const control = findNotificationOpenControl(id, root);
+  if (!control || typeof control.focus !== 'function') return null;
+  try {
+    control.focus({ preventScroll: true });
+  } catch {
+    control.focus();
+  }
+  return control;
+}
+
+/** اختيار الإشعار التالي، أو السابق عند حذف آخر عنصر. */
+export function notificationControlAfterDelete(controls, deletedIndex) {
+  if (controls.length === 0) return null;
+  const index = deletedIndex < 0 ? 0 : Math.min(deletedIndex, controls.length - 1);
+  return controls[index] || null;
 }
 
 /** تحويل وقت الإشعار إلى صيغة نسبية */
@@ -261,8 +349,8 @@ function formatTimeAgo(isoStr) {
   const hours = Math.floor(diff / 3_600_000);
   const days  = Math.floor(diff / 86_400_000);
 
-  if (mins < 1)    return t('notif_just_now')   || 'الآن';
-  if (mins < 60)   return `${t('notif_mins_ago') || 'منذ'} ${mins} ${t('notif_mins') || 'د'}`;
-  if (hours < 24)  return `${t('notif_hours_ago') || 'منذ'} ${hours} ${t('notif_hours') || 'س'}`;
-  return `${t('notif_days_ago') || 'منذ'} ${days} ${t('notif_days') || 'أيام'}`;
+  if (mins < 1)   return t('notif_just_now');
+  if (mins < 60)  return tf('notif_time_minutes', { count: mins });
+  if (hours < 24) return tf('notif_time_hours', { count: hours });
+  return tf('notif_time_days', { count: days });
 }

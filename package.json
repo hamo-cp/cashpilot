@@ -1,0 +1,12 @@
+{
+  "name": "cashpilot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/security-regression.test.js tests/i18n.test.mjs tests/i18n-runtime.test.mjs tests/install-responsive.test.mjs tests/interaction-accessibility.test.mjs tests/local-date.test.mjs tests/market.test.mjs tests/modal-focus.test.mjs tests/navigation-regression.test.mjs tests/privacy.test.mjs tests/release-readiness.test.mjs && node test_suite.js && node test_ui.js",
+    "test:security": "node --test tests/security-regression.test.js",
+    "test:browser": "node tests/browser-cdp.test.mjs",
+    "serve:test": "node tests/static-server.mjs 3000"
+  }
+}

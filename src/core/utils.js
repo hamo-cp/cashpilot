@@ -36,16 +36,31 @@ export function formatDate(dateStr) {
   });
 }
 
-/** اليوم الحالي بصيغة YYYY-MM-DD */
-export function today() {
-  return new Date().toISOString().split('T')[0];
+/** تاريخ التقويم المحلي بصيغة YYYY-MM-DD. */
+export function today(date = new Date()) {
+  const year  = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day   = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /** عدد الأيام المتبقية حتى تاريخ معيّن (سالب = متأخر) */
-export function daysUntil(dateStr) {
+export function daysUntil(dateStr, now = new Date()) {
   if (!dateStr) return null;
-  const diff = new Date(dateStr) - new Date();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateStr));
+  if (!match) return null;
+
+  const [year, month, day] = match.slice(1).map(Number);
+  const targetDay = Date.UTC(year, month - 1, day);
+  const parsed = new Date(targetDay);
+  if (
+    parsed.getUTCFullYear() !== year
+    || parsed.getUTCMonth() !== month - 1
+    || parsed.getUTCDate() !== day
+  ) return null;
+
+  const currentDay = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return (targetDay - currentDay) / 86_400_000;
 }
 
 /** مطابقة سجل مع فترة زمنية (شهر + سنة) */
@@ -60,12 +75,12 @@ export function matchPeriod(dateStr, month, year) {
 
 /** تهريب HTML لمنع XSS */
 export function esc(str) {
-  if (!str) return '';
-  return str
+  return String(str ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 /** توليد SVG icon من الـ sprite */
@@ -82,11 +97,11 @@ export function animateValue(obj, start, end, duration, formatFn = val => val) {
     // ease out effect
     const easeProgress = 1 - Math.pow(1 - progress, 3);
     const currentVal = Math.floor(easeProgress * (end - start) + start);
-    obj.innerHTML = formatFn(currentVal);
+    obj.textContent = formatFn(currentVal);
     if (progress < 1) {
       window.requestAnimationFrame(step);
     } else {
-      obj.innerHTML = formatFn(end);
+      obj.textContent = formatFn(end);
     }
   };
   window.requestAnimationFrame(step);

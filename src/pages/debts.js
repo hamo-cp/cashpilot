@@ -15,14 +15,14 @@ export function renderDebts() {
   const total = Finance.totalDebts();
 
   set('debts-total', formatCurrency(total));
-  set('debts-count', list.length + ' دين');
+  set('debts-count', String(list.length));
 
   const container = document.getElementById('debts-list');
   if (!container) return;
 
   container.innerHTML = list.length
     ? list.map(debtCardHTML).join('')
-    : emptyStateHTML('ic-target', 'لا توجد ديون مسجلة', 'ممتاز! يمكنك إضافة أي ديون لمتابعتها');
+    : emptyStateHTML('ic-target', t('empty_debts'), t('empty_debts_sub'));
 }
 
 export function openDebtModal(editId = null) {
@@ -52,11 +52,11 @@ export function saveDebt(editingId, onDone) {
   const dueDate  = document.getElementById('debt-due')?.value   || '';
   const notes    = document.getElementById('debt-notes')?.value.trim() || '';
 
-  if (!creditor)                     return Toast.show('أدخل اسم الدائن', 'error');
+  if (!creditor)                     return Toast.show(t('debt_creditor_required'), 'error');
   if (creditor.length > 100)         return Toast.show(t('toast_invalid'), 'error');
-  if (!amountEl?.value.trim())       return Toast.show('أدخل قيمة الدين', 'error');
-  if (isNaN(amount) || amount <= 0)  return Toast.show('قيمة الدين يجب أن تكون رقماً موجباً', 'error');
-  if (amount > 999_999_999)          return Toast.show('القيمة كبيرة جداً', 'error');
+  if (!amountEl?.value.trim())       return Toast.show(t('debt_amount_required'), 'error');
+  if (isNaN(amount) || amount <= 0)  return Toast.show(t('debt_amount_positive'), 'error');
+  if (amount > 999_999_999)          return Toast.show(t('value_too_large'), 'error');
   if (paid < 0)                      return Toast.show(t('toast_invalid'), 'error');
   if (paid > amount)                 return Toast.show(t('toast_invalid'), 'error');
 
@@ -64,10 +64,10 @@ export function saveDebt(editingId, onDone) {
 
   if (editingId) {
     Finance.updateDebt(editingId, data);
-    Toast.show('تم تعديل الدين', 'success');
+    Toast.show(t('toast_updated'), 'success');
   } else {
     Finance.addDebt(data);
-    Toast.show('تم إضافة الدين', 'success');
+    Toast.show(t('toast_added'), 'success');
   }
   onDone?.();
 }

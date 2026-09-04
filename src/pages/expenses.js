@@ -3,7 +3,7 @@
  */
 import { getState }                        from '../core/state.js';
 import { t } from '../core/i18n.js';
-import { formatCurrency, matchPeriod }     from '../core/utils.js';
+import { formatCurrency, matchPeriod, today } from '../core/utils.js';
 import * as Finance                        from '../services/finance.js';
 import { expenseItemHTML, emptyStateHTML, categorySummaryHTML } from '../ui/components.js';
 import { renderBarChart }                  from '../charts/charts.js';
@@ -18,7 +18,7 @@ export function renderExpenses() {
   const total = list.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
 
   set('exp-total', formatCurrency(total));
-  set('exp-count', list.length + ' عملية');
+  set('exp-count', String(list.length));
 
   // Category summary
   const catSummary = document.getElementById('exp-categories-summary');
@@ -30,7 +30,7 @@ export function renderExpenses() {
           const pct = total > 0 ? (amt / total * 100) : 0;
           return categorySummaryHTML(cat, amt, pct);
         }).join('')
-      : '<p class="text-muted" style="padding:12px 0;text-align:center">لا توجد بيانات</p>';
+      : `<p class="text-muted" style="padding:12px 0;text-align:center">${t('empty_category_data')}</p>`;
   }
 
   // List
@@ -38,7 +38,7 @@ export function renderExpenses() {
   if (!container) return;
 
   if (!list.length) {
-    container.innerHTML = emptyStateHTML('ic-shopping', 'لا توجد مصروفات', 'اضغط + لتسجيل مصروف جديد');
+    container.innerHTML = emptyStateHTML('ic-shopping', t('empty_expenses'), t('empty_expenses_sub'));
     return;
   }
   const sorted = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -56,7 +56,7 @@ export function openExpenseModal(editId = null) {
   document.getElementById('exp-name').value     = item?.name     || '';
   document.getElementById('exp-amount').value   = item?.amount   || '';
   document.getElementById('exp-category').value = item?.category || 'food';
-  document.getElementById('exp-date').value     = item?.date     || new Date().toISOString().split('T')[0];
+  document.getElementById('exp-date').value     = item?.date     || today();
   document.getElementById('exp-notes').value    = item?.notes    || '';
 
   openModal('expenseModal');
@@ -74,21 +74,21 @@ export function saveExpense(editingId, onDone) {
   const date     = dateEl?.value            || '';
   const notes    = document.getElementById('exp-notes')?.value.trim() || '';
 
-  if (!name)                        return Toast.show('أدخل اسم المصروف', 'error');
+  if (!name)                        return Toast.show(t('expense_name_required'), 'error');
   if (name.length > 100)            return Toast.show(t('toast_invalid'), 'error');
-  if (!amountEl?.value.trim())      return Toast.show('أدخل المبلغ', 'error');
-  if (isNaN(amount) || amount <= 0) return Toast.show('المبلغ يجب أن يكون رقماً موجباً', 'error');
+  if (!amountEl?.value.trim())      return Toast.show(t('amount_required'), 'error');
+  if (isNaN(amount) || amount <= 0) return Toast.show(t('amount_positive'), 'error');
   if (amount > 999_999_999)         return Toast.show(t('toast_invalid'), 'error');
-  if (!date)                        return Toast.show('أدخل التاريخ', 'error');
+  if (!date)                        return Toast.show(t('date_input_required'), 'error');
 
   const data = { name, amount, category, date, notes };
 
   if (editingId) {
     Finance.updateExpense(editingId, data);
-    Toast.show('تم تعديل المصروف', 'success');
+    Toast.show(t('toast_updated'), 'success');
   } else {
     Finance.addExpense(data);
-    Toast.show('تم تسجيل المصروف', 'success');
+    Toast.show(t('toast_added'), 'success');
   }
   onDone?.();
 }

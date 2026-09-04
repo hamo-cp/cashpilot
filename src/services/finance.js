@@ -7,7 +7,7 @@
 import * as DB from '../storage/db.js';
 import { uid, today, matchPeriod } from '../core/utils.js';
 import { t } from '../core/i18n.js';
-import { EXPENSE_CATEGORIES } from '../core/constants.js';
+import { BUDGET_CATEGORIES, EXPENSE_CATEGORIES } from '../core/constants.js';
 
 /* ── تنظيف record يأتي من localStorage — يمنع crash عند بيانات تالفة ── */
 function sanitizeAmount(val) {
@@ -86,11 +86,12 @@ export function totalExpenses(month, year) {
 }
 
 export function expensesByCategory(month, year) {
-  const result = {};
+  const result = Object.create(null);
   getExpenses()
     .filter(i => matchPeriod(i.date, month, year))
     .forEach(i => {
-      result[i.category] = (result[i.category] || 0) + (parseFloat(i.amount) || 0);
+      const category = Object.hasOwn(EXPENSE_CATEGORIES, i.category) ? i.category : 'other';
+      result[category] = (result[category] || 0) + sanitizeAmount(i.amount);
     });
   return result;
 }
@@ -104,7 +105,21 @@ export function dailyExpenses(month, year) {
     .filter(i => matchPeriod(i.date, month, year))
     .forEach(i => {
       const day     = new Date(i.date).getDate();
-      result[day]   = (result[day] || 0) + (parseFloat(i.amount) || 0);
+      result[day]   = (result[day] || 0) + sanitizeAmount(i.amount);
+    });
+  return result;
+}
+
+export function dailyIncome(month, year) {
+  const result = {};
+  const daysInMonth = new Date(year, month, 0).getDate();
+  for (let day = 1; day <= daysInMonth; day++) result[day] = 0;
+
+  getIncome()
+    .filter(item => matchPeriod(item.date, month, year))
+    .forEach(item => {
+      const day = new Date(item.date).getDate();
+      result[day] = (result[day] || 0) + sanitizeAmount(item.amount);
     });
   return result;
 }
@@ -226,14 +241,14 @@ export function deleteSubscription(id) {
    ════════════════════════════════════════ */
 
 export function getBudget() {
-  return DB.get(DB.KEYS.BUDGET) || {
-    food: 0, transport: 0, education: 0, health: 0,
-    entertainment: 0, shopping: 0, bills: 0, internet: 0,
-  };
+  const stored = DB.get(DB.KEYS.BUDGET);
+  return Object.fromEntries(BUDGET_CATEGORIES.map(({ key }) => [key, sanitizeAmount(stored?.[key])]));
 }
 
 export function setBudget(budget) {
-  DB.set(DB.KEYS.BUDGET, budget);
+  return DB.set(DB.KEYS.BUDGET, Object.fromEntries(
+    BUDGET_CATEGORIES.map(({ key }) => [key, sanitizeAmount(budget?.[key])]),
+  ));
 }
 
 /* ════════════════════════════════════════
@@ -263,22 +278,22 @@ export function getMonthSummary(month, year) {
 
   const budget      = getBudget();
   const budgetTotal = Object.values(budget).reduce((s, v) => s + (parseFloat(v) || 0), 0);
-  const budgetRate  = budgetTotal > 0 ? Math.min(100, (expenses / budgetTotal) * 100) : 0;
+  const budgetRate  = budgetTotal > 0 ? (expenses / budgetTotal) * 100 : 0;
 
   return { income, expenses, net, debts, investments, savingRate, spendRate, budgetRate, budgetTotal };
 }
 
 export function getBalanceTrend(month, year) {
   const daysInMonth = new Date(year, month, 0).getDate();
+  const dailyInc    = dailyIncome(month, year);
   const dailyExp    = dailyExpenses(month, year);
-  const totalInc    = totalIncome(month, year);
   const labels      = [];
   const data        = [];
-  let balance       = totalInc;
+  let balance       = 0;
 
   for (let d = 1; d <= daysInMonth; d++) {
     labels.push(d);
-    if (d > 1) balance -= (dailyExp[d] || 0);
+    balance += (dailyInc[d] || 0) - (dailyExp[d] || 0);
     data.push(parseFloat(balance.toFixed(2)));
   }
   return { labels, data };
@@ -288,12 +303,12 @@ export function searchTransactions(query, month, year) {
   const q       = query.toLowerCase().trim();
   const income  = getIncome()
     .filter(i => matchPeriod(i.date, month, year))
-    .filter(i => !q || i.name.toLowerCase().includes(q) || (i.notes || '').toLowerCase().includes(q))
+    .filter(i => !q || String(i.name || '').toLowerCase().includes(q) || String(i.notes || '').toLowerCase().includes(q))
     .map(i => ({ ...i, type: 'income' }));
 
   const expenses = getExpenses()
     .filter(i => matchPeriod(i.date, month, year))
-    .filter(i => !q || i.name.toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q))
+    .filter(i => !q || String(i.name || '').toLowerCase().includes(q) || String(i.category || '').toLowerCase().includes(q))
     .map(i => ({ ...i, type: 'expense' }));
 
   return [...income, ...expenses].sort((a, b) => new Date(b.date) - new Date(a.date));

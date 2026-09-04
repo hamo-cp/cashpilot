@@ -1,30 +1,37 @@
-import fs from 'fs';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 const html = fs.readFileSync('index.html', 'utf8');
-const js = fs.readFileSync('src/main.js', 'utf8');
-const comp = fs.readFileSync('src/ui/components.js', 'utf8');
+const main = fs.readFileSync('src/main.js', 'utf8');
+const dynamicSources = [
+  fs.readFileSync('src/ui/components.js', 'utf8'),
+  fs.readFileSync('src/pages/subscriptions.js', 'utf8'),
+  fs.readFileSync('src/services/notifications.js', 'utf8'),
+].join('\n');
 
-// Find all onclick attributes
-const clicks = [...html.matchAll(/onclick="([^"]+)"/g), ...comp.matchAll(/onclick="([^"]+)"/g)];
-
-console.log(`Found ${clicks.length} buttons/actions to verify...`);
-
-let missing = 0;
-clicks.forEach(match => {
-  let funcCall = match[1];
-  // extract function name e.g. App.navigateTo('home') -> App.navigateTo
-  let funcName = funcCall.split('(')[0].trim();
-  
-  if (funcName.startsWith('App.')) {
-    let method = funcName.split('.')[1];
-    // verify method exists in main.js
-    if (!js.includes(`${method}(`) && !js.includes(`${method}:`) && !js.includes(`${method} =`)) {
-      console.log(`❌ ERROR: Button calls App.${method} but it does NOT exist in main.js!`);
-      missing++;
-    }
+const clicks = [...html.matchAll(/onclick="([^"]+)"/g)];
+const missing = [];
+for (const match of clicks) {
+  const functionName = match[1].split('(')[0].trim();
+  if (!functionName.startsWith('App.')) continue;
+  const method = functionName.split('.')[1];
+  if (!main.includes(`${method}(`) && !main.includes(`${method}:`) && !main.includes(`${method} =`)) {
+    missing.push(method);
   }
-});
-
-if (missing === 0) {
-  console.log("✅ All buttons are strictly linked to working functions. ZERO dead buttons!");
 }
+
+assert.deepEqual(missing, [], `Dead App handlers: ${missing.join(', ')}`);
+
+const allowedDynamicActions = new Set(['edit', 'delete', 'open-notification', 'delete-notification']);
+const emittedActions = [...dynamicSources.matchAll(/data-app-action="([^"]+)"/g)].map(match => match[1]);
+assert.ok(emittedActions.length > 0, 'Expected dynamic data actions');
+assert.deepEqual(
+  emittedActions.filter(action => !allowedDynamicActions.has(action)),
+  [],
+  'Unknown dynamic action emitted',
+);
+
+assert.equal(html.includes(['ai', 'GenerateBtn'].join('')), false);
+assert.equal(main.includes(['generate', 'AIInsights'].join('')), false);
+
+console.log(`Verified ${clicks.length} static App actions and ${emittedActions.length} inert dynamic actions.`);
