@@ -1,6 +1,6 @@
 /* CashPilot service worker: local, explicit, same-origin offline cache. */
 
-const CACHE_NAME = 'cashpilot-v8-security';
+const CACHE_NAME = 'cashpilot-v9-pwa-icons';
 const STATIC_ASSETS = [
   './',
   './index.html',

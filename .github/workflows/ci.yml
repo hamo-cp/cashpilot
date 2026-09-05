@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    name: Regression (${{ matrix.os }}, Node 24)
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      # Tests use Node built-ins only; there are no npm dependencies to install.
+      - name: Run regression suites
+        run: npm test
+
+  browser:
+    name: Browser (Chrome, Ubuntu)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Run browser regression suite
+        shell: bash
+        env:
+          CASHPILOT_BASE_URL: http://127.0.0.1:3000
+          CASHPILOT_CDP_PORT: '9222'
+          CASHPILOT_DESKTOP_SCREENSHOT: ${{ runner.temp }}/cashpilot-browser/desktop.png
+          CASHPILOT_MOBILE_SCREENSHOT: ${{ runner.temp }}/cashpilot-browser/mobile.png
+        run: |
+          set -euo pipefail
+          evidence_dir="$RUNNER_TEMP/cashpilot-browser"
+          mkdir -p "$evidence_dir"
+          server_pid=''
+          chrome_pid=''
+          cleanup() {
+            if [[ -n "$chrome_pid" ]]; then kill "$chrome_pid" 2>/dev/null || true; fi
+            if [[ -n "$server_pid" ]]; then kill "$server_pid" 2>/dev/null || true; fi
+          }
+          trap cleanup EXIT
+
+          google-chrome --version | tee "$evidence_dir/chrome-version.log"
+          node tests/static-server.mjs 3000 >"$evidence_dir/server.log" 2>&1 &
+          server_pid=$!
+          google-chrome --headless --disable-gpu --no-first-run --no-default-browser-check \
+            --remote-debugging-address=127.0.0.1 --remote-debugging-port="$CASHPILOT_CDP_PORT" \
+            --user-data-dir="$RUNNER_TEMP/cashpilot-chrome-profile" \
+            about:blank >"$evidence_dir/chrome.log" 2>&1 &
+          chrome_pid=$!
+
+          # Wait for both services, and fail promptly if either process exits.
+          ready=false
+          for attempt in {1..30}; do
+            kill -0 "$server_pid"
+            kill -0 "$chrome_pid"
+            if curl --fail --silent --output /dev/null "$CASHPILOT_BASE_URL" \
+              && curl --fail --silent --output /dev/null "http://127.0.0.1:$CASHPILOT_CDP_PORT/json/version"; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [[ "$ready" != true ]]; then
+            echo 'The test server or Chrome did not become ready within 30 seconds.' >&2
+            exit 1
+          fi
+
+          npm run test:browser 2>&1 | tee "$evidence_dir/test.log"
+      - name: Upload browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-evidence
+          path: ${{ runner.temp }}/cashpilot-browser/
+          if-no-files-found: warn
+          retention-days: 7
