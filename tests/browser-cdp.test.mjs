@@ -98,7 +98,17 @@ const cdp = new CdpClient(target.webSocketDebuggerUrl);
 const requests = [];
 const failedResponses = [];
 const consoleErrors = [];
-cdp.on('Network.requestWillBeSent', params => requests.push(params.request.url));
+const requestUrls = new Map();
+const failedRequests = [];
+let lastNavigation;
+let beforeOffline;
+cdp.on('Network.requestWillBeSent', params => {
+  requests.push(params.request.url);
+  requestUrls.set(params.requestId, params.request.url);
+});
+cdp.on('Network.loadingFailed', params => failedRequests.push({
+  url: requestUrls.get(params.requestId), error: params.errorText, type: params.type,
+}));
 cdp.on('Network.responseReceived', params => {
   if (params.response.status >= 400) {
     failedResponses.push({ status: params.response.status, url: params.response.url });
@@ -127,8 +137,9 @@ async function evaluate(expression) {
 async function navigate(url = baseUrl) {
   const expectedOrigin = new URL(url).origin;
   const loaded = cdp.waitFor('Page.loadEventFired');
-  await cdp.send('Page.navigate', { url });
+  lastNavigation = await cdp.send('Page.navigate', { url });
   await loaded;
+  if (lastNavigation.errorText) throw new Error(`Page navigation failed: ${lastNavigation.errorText}`);
   await retry(() => evaluate(`
     return location.origin === ${JSON.stringify(expectedOrigin)}
       && typeof window.App?.navigateTo === 'function';
@@ -168,6 +179,9 @@ async function waitForAnalyticsCanvases() {
       })
     );
   `));
+  // Analytics uses requestAnimationFrame counters lasting up to 1.8s, in
+  // addition to CSS entry animations. Two frames alone capture partial values.
+  await new Promise(resolve => setTimeout(resolve, 2_100));
 }
 
 async function waitForTwoAnimationFrames() {
@@ -175,6 +189,33 @@ async function waitForTwoAnimationFrames() {
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return true;
   `);
+}
+
+async function checkManifestIcons() {
+  const icons = await evaluate(`
+    const manifestUrl = document.querySelector('link[rel="manifest"]').href;
+    const manifestResponse = await fetch(manifestUrl);
+    if (!manifestResponse.ok) throw new Error('Manifest did not load');
+    const manifest = await manifestResponse.json();
+    return Promise.all(manifest.icons.map(async icon => {
+      const url = new URL(icon.src, manifestUrl);
+      if (url.origin !== location.origin) throw new Error('Icon must be same-origin');
+      const response = await fetch(url.href);
+      if (!response.ok) throw new Error('Icon did not load: ' + icon.src);
+      const bitmap = await createImageBitmap(await response.blob());
+      const result = {
+        src: icon.src, purpose: icon.purpose, declared: icon.sizes,
+        actual: bitmap.width + 'x' + bitmap.height,
+      };
+      bitmap.close();
+      return result;
+    }));
+  `);
+  assert.equal(icons.length, 4);
+  for (const icon of icons) {
+    assert.equal(icon.actual, icon.declared, JSON.stringify(icon));
+  }
+  return icons;
 }
 
 async function visibleArabicLeaks() {
@@ -243,6 +284,9 @@ try {
   await evaluate(`
     localStorage.clear();
     sessionStorage.clear();
+    // Use returning-user state so the delayed notification onboarding prompt
+    // cannot cover CI screenshots or shift position during viewport changes.
+    localStorage.setItem('mz_notif_permission_asked', '1');
     return true;
   `);
   await navigate();
@@ -266,6 +310,8 @@ try {
   assert.equal(identity.aiButtonGone, true);
   assert.equal(identity.aiMethodGone, true);
   assert.equal(identity.chartLocal, true);
+
+  const onlineIcons = await checkManifestIcons();
 
   await evaluate(`
     App.openIncomeModal();
@@ -560,6 +606,15 @@ try {
 
   await retry(() => evaluate('return navigator.serviceWorker.ready.then(() => true);'), 20_000);
   await navigate();
+  beforeOffline = await evaluate(`
+    const registration = await navigator.serviceWorker.ready;
+    return {
+      controller: navigator.serviceWorker.controller?.scriptURL || null,
+      state: navigator.serviceWorker.controller?.state,
+      scope: registration.scope,
+      caches: await caches.keys(),
+    };
+  `);
   await cdp.send('Network.emulateNetworkConditions', {
     offline: true,
     latency: 0,
@@ -588,6 +643,8 @@ try {
   assert.equal(offlineState.overlay, false);
   assert.equal(offlineState.chartLocal, true, JSON.stringify(offlineState));
   assert.match(offlineState.chartSource, /\/vendor\/chart\.js-4\.4\.0\/chart\.umd\.js$/);
+  const offlineIcons = await checkManifestIcons();
+  assert.deepEqual(offlineIcons, onlineIcons);
   await cdp.send('Network.emulateNetworkConditions', {
     offline: false,
     latency: 0,
@@ -732,7 +789,37 @@ try {
     mobileViewport: mobileLayout,
     requests: requests.length,
     consoleErrors: consoleErrors.length,
+    icons: { online: onlineIcons, offline: offlineIcons },
   }));
+} catch (error) {
+  // Preserve the failing page and worker state for CI instead of losing evidence
+  // when the dedicated test target is closed below.
+  try {
+    await screenshot(desktopScreenshot.replace(/\.png$/, '-failure.png'));
+    const diagnostics = await evaluate(`
+      const result = {
+        url: location.href, title: document.title, readyState: document.readyState,
+        app: Boolean(window.App), text: document.body?.innerText.slice(0, 600),
+      };
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        result.controller = navigator.serviceWorker.controller?.scriptURL || null;
+        result.registrations = registrations.map(registration => ({
+          scope: registration.scope, active: registration.active?.state,
+          installing: registration.installing?.state, waiting: registration.waiting?.state,
+        }));
+        result.cacheEntries = {};
+        for (const name of await caches.keys()) {
+          result.cacheEntries[name] = (await (await caches.open(name)).keys()).map(request => request.url);
+        }
+      } catch (workerError) { result.workerError = workerError.message; }
+      return result;
+    `);
+    console.error(JSON.stringify({ diagnostics, beforeOffline, lastNavigation, consoleErrors, failedResponses, failedRequests }));
+  } catch (diagnosticError) {
+    console.error('Could not capture browser failure diagnostics:', diagnosticError.message);
+  }
+  throw error;
 } finally {
   cdp.close();
   if (target.createdByTest) {
