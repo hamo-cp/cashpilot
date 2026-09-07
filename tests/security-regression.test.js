@@ -584,6 +584,12 @@ function walkTextFiles(directory) {
 }
 
 test('Gemini runtime and identifiers are absent from the current tree', () => {
+  // These specific Markdown files document retirement and verification.
+  // Keep scanning runtime/config files and unexpected legacy copies.
+  const retirementDocs = new Set([
+    resolve(root, 'README.md'),
+    resolve(root, 'docs/operations.md'),
+  ]);
   const forbidden = [
     'gemini',
     'generativelanguage.googleapis.com',
@@ -597,6 +603,7 @@ test('Gemini runtime and identifiers are absent from the current tree', () => {
   const hits = [];
   for (const path of walkTextFiles(root)) {
     if (resolve(path) === resolve(fileURLToPath(import.meta.url))) continue;
+    if (retirementDocs.has(resolve(path))) continue;
     const content = readFileSync(path, 'utf8');
     for (const needle of forbidden) {
       if (content.toLowerCase().includes(needle.toLowerCase())) {
