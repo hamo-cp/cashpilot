@@ -150,3 +150,21 @@ The branch `mobile/android-capacitor` still points at baseline `5bf83ffc2f12ec55
 ### Remaining release-blocking preflight item
 
 The connected GitHub integration cannot read branch-protection settings (HTTP 403, resource not accessible by integration), and there is no available write action for applying rulesets. The repository branch listing currently reports `protected: false` for `master`. The owner must configure and then verify this in GitHub Settings before Argon starts.
+
+
+## Ruleset activation verified (2026-10-17)
+
+The repository owner created active ruleset **Protect master** (ID `25307318`). GitHub API read-back confirms:
+- Target condition is `~DEFAULT_BRANCH` (the repository's default branch is `master`).
+- Enforcement is `active`.
+- Bypass list is empty; `current_user_can_bypass` is `never`.
+- Pull requests are required, with one approval; stale approvals are dismissed; latest reviewable push approval and conversation resolution are required; extra approval for unattributed Copilot changes is enabled.
+- Required checks are exactly `Regression (ubuntu-24.04, Node 24)`, `Regression (windows-2025, Node 24)`, and `Browser (Chrome, Ubuntu)`.
+- Strict status-check policy is enabled (branch must be up to date).
+- Deletion and non-fast-forward updates are blocked.
+
+The earlier note that protection was still blocked is superseded by this read-back. The ruleset is now active and verified.
+
+The documentation PR #6's own CI run `39043108801` completed successfully with all three jobs passing: https://github.com/hamo-cp/cashpilot/actions/runs/39043108801
+
+Remaining boundary: repository inspection cannot enumerate local Antigravity sessions or local scheduled jobs. Check the local Antigravity workspace before starting Argon; do not launch parallel Android agents.
