@@ -118,3 +118,35 @@ The GitHub branch listing reports `protected: false` for `master`. Reading the d
 - Operating contract: [docs/argon-agent-contract.md](https://github.com/hamo-cp/cashpilot/blob/maintenance/agent-hygiene-audit-2026-10/docs/argon-agent-contract.md)
 - Created isolated future work branch `mobile/android-capacitor` at the exact baseline SHA `5bf83ffc2f12ec5509cdbdb7f453a2dc1454f493`. No implementation has started on that branch.
 - Issue #3 remains the sole Android implementation task. Issue #5 remains the preflight/automation hygiene gate; it is not a second Android implementation task.
+
+
+## Final Phase-2 verification snapshot (2026-10-17)
+
+### Baseline CI succeeded on the exact master SHA
+
+Created branch `mobile/android-capacitor` at the exact `master` baseline SHA `5bf83ffc2f12ec5509cdbdb7f453a2dc1454f493`, without adding implementation changes. Workflow run `39043009848` completed successfully on that exact commit with all three jobs passing:
+
+- `Regression (ubuntu-24.04, Node 24)`
+- `Regression (windows-2025, Node 24)`
+- `Browser (Chrome, Ubuntu)`
+
+Run: https://github.com/hamo-cp/cashpilot/actions/runs/39043009848
+
+This is the authoritative successful baseline run for the clean implementation branch. The cancelled run on `android/capacitor-baseline` remains a cancelled historical run; it must not be counted as a pass.
+
+### Old attempt retry outcome
+
+The retry of the historical cancelled run `39041938558` finished with:
+- `Regression (ubuntu-24.04, Node 24)`: success
+- `Regression (windows-2025, Node 24)`: success
+- `Browser (Chrome, Ubuntu)`: cancelled
+
+This does not replace the complete successful run above.
+
+### Implementation work has not started
+
+The branch `mobile/android-capacitor` still points at baseline `5bf83ffc2f12ec5509cdbdb7f453a2dc1454f493`. It has no Android implementation commit yet. Argon must remain blocked until the owner confirms branch protection for `master`.
+
+### Remaining release-blocking preflight item
+
+The connected GitHub integration cannot read branch-protection settings (HTTP 403, resource not accessible by integration), and there is no available write action for applying rulesets. The repository branch listing currently reports `protected: false` for `master`. The owner must configure and then verify this in GitHub Settings before Argon starts.
