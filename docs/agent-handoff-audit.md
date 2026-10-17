@@ -85,3 +85,36 @@ This audit did not:
 - Latest cancelled CI run: https://github.com/hamo-cp/cashpilot/actions/runs/39041938558
 - Earlier successful CI run on the Android baseline commit: https://github.com/hamo-cp/cashpilot/actions/runs/38080238669
 - v1.0.0 release: https://github.com/hamo-cp/cashpilot/releases/tag/v1.0.0
+
+
+## Follow-up validation (2026-10-17)
+
+### Exact successful check names
+
+The earlier successful CI run `38080238669` on Android baseline commit `706c4d8aae43d2df465076f7b87e8d7a98dc55f2` completed all three jobs successfully:
+
+- `Regression (ubuntu-24.04, Node 24)`
+- `Regression (windows-2025, Node 24)`
+- `Browser (Chrome, Ubuntu)`
+
+These are the exact GitHub Actions check names to select when configuring required status checks. The separately reported `Cloudflare Pages` check is a deployment integration check, not one of the three repository CI test jobs.
+
+The latest cancelled run `39041938558` was re-run. At the time of this update:
+- `Regression (ubuntu-24.04, Node 24)` succeeded.
+- `Regression (windows-2025, Node 24)` was still in progress after the re-run request.
+- `Browser (Chrome, Ubuntu)` was cancelled in the earlier attempt; re-running that job directly through the connected GitHub integration was rejected. A later successful full CI run `39042802113` on the audit branch at commit `d2df3160aa9ab6d0f5418ff9bcaede01be050073` completed all three jobs successfully, demonstrating the exact check set on the audit branch (which shares the baseline application tree and adds documentation only).
+
+Links:
+- Earlier complete baseline run: https://github.com/hamo-cp/cashpilot/actions/runs/38080238669
+- Cancelled then partially re-run baseline attempt: https://github.com/hamo-cp/cashpilot/actions/runs/39041938558
+- Complete audit-branch validation: https://github.com/hamo-cp/cashpilot/actions/runs/39042802113
+
+### Branch protection status
+
+The GitHub branch listing reports `protected: false` for `master`. Reading the direct branch-protection API returned HTTP 403 `Resource not accessible by integration`; the currently connected GitHub integration cannot configure or verify the administrative protection settings. Therefore `master` protection is **not yet applied or verified** and must be configured by the repository owner in GitHub Settings before Argon begins implementation.
+
+### Argon handoff files and single workstream
+
+- Operating contract: [docs/argon-agent-contract.md](https://github.com/hamo-cp/cashpilot/blob/maintenance/agent-hygiene-audit-2026-10/docs/argon-agent-contract.md)
+- Created isolated future work branch `mobile/android-capacitor` at the exact baseline SHA `5bf83ffc2f12ec5509cdbdb7f453a2dc1454f493`. No implementation has started on that branch.
+- Issue #3 remains the sole Android implementation task. Issue #5 remains the preflight/automation hygiene gate; it is not a second Android implementation task.
