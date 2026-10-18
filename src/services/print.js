@@ -4,28 +4,31 @@
  */
 
 import { getState }               from '../core/state.js';
-import { formatCurrency, formatPercent } from '../core/utils.js';
+import { formatCurrency, formatPercent, isNativeCapacitor } from '../core/utils.js';
 import { MONTH_NAMES }            from '../core/constants.js';
 import { getMonthSummary }        from './finance.js';
 import { getLang, t, tf }         from '../core/i18n.js';
 
-export function printSummary() {
+export function printSummary(options = {}) {
+  const opts = (options && typeof options === 'object' && typeof options.preventDefault !== 'function')
+    ? options
+    : {};
+  const view = opts.view || globalThis.window;
+
   const { filterMonth: m, filterYear: y } = getState();
   const s         = getMonthSummary(m, y);
   const lang      = getLang();
   const dir       = lang === 'ar' ? 'rtl' : 'ltr';
   const monthName = t(MONTH_NAMES[m - 1]);
   const dateStr   = new Date().toLocaleDateString(t('locale'));
+  const title     = tf('print_title', { month: monthName, year: y });
 
-  const w = window.open('', '_blank');
-  if (!w) return;
-
-  w.document.write(`
+  const html = `
     <!DOCTYPE html>
     <html lang="${lang}" dir="${dir}">
     <head>
       <meta charset="UTF-8">
-      <title>${tf('print_title', { month: monthName, year: y })}</title>
+      <title>${title}</title>
       <style>
         body  { font-family: Cairo, Arial, sans-serif; padding: 30px; color: #111; direction: ${dir}; }
         h1    { color: #3b6ef0; font-size: 22px; margin-bottom: 4px; }
@@ -69,6 +72,17 @@ export function printSummary() {
       </button>
     </body>
     </html>
-  `);
+  `;
+
+  if (isNativeCapacitor(view) && typeof view?.CashPilotAndroid?.printHtml === 'function') {
+    const printed = view.CashPilotAndroid.printHtml(title, html);
+    if (printed) return { strategy: 'android-print-manager', printed: true };
+  }
+
+  const w = view?.open?.('', '_blank');
+  if (!w) return { strategy: 'window-open', printed: false };
+
+  w.document.write(html);
   w.document.close();
+  return { strategy: 'window-open', printed: true };
 }

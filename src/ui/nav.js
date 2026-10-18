@@ -152,3 +152,40 @@ export function bindSwipe(renderPage) {
     }
   }, { passive: true });
 }
+
+/**
+ * معالجة زر الرجوع في أندرويد (إغلاق حوار التأكيد أولاً، ثم النوافذ المنبثقة، ثم العودة للرئيسية).
+ * @returns {boolean} true إذا تم استهلاك الحدث داخل التطبيق، false للسماح بالخروج الطبيعي.
+ */
+export function handleAndroidBack({
+  doc = globalThis.document,
+  currentState = getState(),
+  onCancelConfirm,
+  onCloseModal,
+  onNavigateDashboard,
+} = {}) {
+  const activeConfirm = doc?.getElementById?.('confirmDialog')?.classList?.contains?.('active')
+    || Boolean(doc?.querySelector?.('.confirm-dialog.active'));
+  if (activeConfirm) {
+    onCancelConfirm?.();
+    return true;
+  }
+
+  const activeModal = Boolean(doc?.querySelector?.('.modal-overlay.active'));
+  if (activeModal) {
+    onCloseModal?.();
+    return true;
+  }
+
+  const page = currentState?.currentPage || 'dashboard';
+  if (page !== 'dashboard') {
+    if (typeof onNavigateDashboard === 'function') {
+      onNavigateDashboard();
+    } else {
+      navigateTo('dashboard');
+    }
+    return true;
+  }
+
+  return false;
+}

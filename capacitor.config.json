@@ -1,0 +1,8 @@
+{
+  "appId": "com.cashpilot.app",
+  "appName": "CashPilot",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

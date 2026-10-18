@@ -3,6 +3,8 @@
  * @description إدارة دورة حياة زر تثبيت الـPWA دون عرض control غير قابل للتنفيذ.
  */
 
+import { isNativeCapacitor } from '../core/utils.js';
+
 export function bindPWAInstall({
   root = document,
   view = window,
@@ -15,6 +17,7 @@ export function bindPWAInstall({
   const isStandalone = () => (
     view.matchMedia?.('(display-mode: standalone)')?.matches === true
     || nav.standalone === true
+    || isNativeCapacitor(view)
   );
   const hide = () => {
     button.hidden = true;

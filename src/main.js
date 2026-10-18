@@ -12,6 +12,7 @@
  */
 
 import { getLang, setLang, toggleLang, translatePage, t } from './core/i18n.js';
+import { registerAppServiceWorker }    from './core/utils.js';
 import { applyGlobalDefaults }         from './charts/chartConfig.js';
 import { getSettings, saveSettings }   from './services/finance.js';
 import { exportData, importData }       from './services/backup.js';
@@ -20,7 +21,8 @@ import { getState, setState }           from './core/state.js';
 import { navigateTo, bindNavButtons,
          bindCenterButton, setupFilters,
          bindSwipe, syncFilterChipSelection,
-         focusElementSafely, focusPageDestination } from './ui/nav.js';
+         focusElementSafely, focusPageDestination,
+         handleAndroidBack } from './ui/nav.js';
 import { bindModalEvents, openModal,
          closeModal, openConfirm,
          cancelConfirm, executeConfirm } from './ui/modal.js';
@@ -118,11 +120,7 @@ function handleDelete(type, id) {
 }
 
 function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('[App] SW registered'))
-      .catch(err => console.warn('[App] SW failed:', err));
-  }
+  return registerAppServiceWorker();
 }
 
 function hideWelcomeScreen() {
@@ -365,6 +363,11 @@ function bindDynamicActions() {
 export const App = {
   // التنقل
   navigateTo: (page) => navigateTo(page, renderPage),
+  handleAndroidBack: () => handleAndroidBack({
+    onCancelConfirm: cancelConfirm,
+    onCloseModal: closeModal,
+    onNavigateDashboard: () => navigateTo('dashboard', renderPage),
+  }),
 
   // Modals
   openIncomeModal:     (id) => { setState({ editingId: id || null }); openIncomeModal(id); openModal('incomeModal'); },

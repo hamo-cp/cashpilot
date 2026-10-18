@@ -106,3 +106,50 @@ export function animateValue(obj, start, end, duration, formatFn = val => val) {
   };
   window.requestAnimationFrame(step);
 }
+
+/** التحقق مما إذا كان التطبيق يعمل داخل بيئة Capacitor الأصلية (Android / iOS) */
+export function isNativeCapacitor(view = globalThis.window) {
+  try {
+    const cap = view?.Capacitor;
+    if (!cap) return false;
+    if (typeof cap.isNativePlatform === 'function') {
+      return Boolean(cap.isNativePlatform());
+    }
+    const platform = typeof cap.getPlatform === 'function' ? cap.getPlatform() : cap.platform;
+    return platform === 'android' || platform === 'ios';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * تسجيل Service Worker على الويب فقط، وتخطيه/إلغاء تسجيله داخل Capacitor الأصلي
+ * لمنع تقديم أصول قديمة مخبأة بعد تحديث حزمة APK.
+ */
+export function registerAppServiceWorker({
+  view = globalThis.window,
+  nav = globalThis.navigator,
+  scriptUrl = './service-worker.js',
+} = {}) {
+  if (isNativeCapacitor(view)) {
+    if (typeof nav?.serviceWorker?.getRegistrations === 'function') {
+      Promise.resolve(nav.serviceWorker.getRegistrations())
+        .then(registrations => {
+          if (Array.isArray(registrations)) {
+            registrations.forEach(reg => reg?.unregister?.());
+          }
+        })
+        .catch(() => {});
+    }
+    return { registered: false, reason: 'native-capacitor' };
+  }
+
+  if (nav && 'serviceWorker' in nav && typeof nav.serviceWorker?.register === 'function') {
+    nav.serviceWorker.register(scriptUrl)
+      .then(() => console.log('[App] SW registered'))
+      .catch(err => console.warn('[App] SW failed:', err));
+    return { registered: true, reason: 'web-service-worker' };
+  }
+
+  return { registered: false, reason: 'unsupported' };
+}

@@ -4,28 +4,75 @@
  */
 
 import * as DB    from '../storage/db.js';
-import { today, uid }  from '../core/utils.js';
+import { isNativeCapacitor, today, uid }  from '../core/utils.js';
 import {
   BUDGET_CATEGORIES, EXPENSE_CATEGORIES, INCOME_SOURCES, INVESTMENT_TYPES,
 } from '../core/constants.js';
 import * as Toast from '../ui/toast.js';
 import { t, tf } from '../core/i18n.js';
 
-export function exportData() {
+export function selectBackupExportStrategy({
+  view = globalThis.window,
+  nav = globalThis.navigator,
+  FileCtor = globalThis.File,
+} = {}) {
+  if (isNativeCapacitor(view) && typeof view?.CashPilotAndroid?.saveJsonBackup === 'function') {
+    return 'android-saf';
+  }
+  if (isNativeCapacitor(view) && typeof FileCtor === 'function' && typeof nav?.share === 'function') {
+    return 'web-share';
+  }
+  return 'anchor-download';
+}
+
+export function exportData(options = {}) {
+  const opts = (options && typeof options === 'object' && typeof options.preventDefault !== 'function')
+    ? options
+    : {};
+  const view = opts.view || globalThis.window;
+  const nav = opts.nav || globalThis.navigator;
+  const doc = opts.doc || globalThis.document;
+  const FileCtor = opts.FileCtor || globalThis.File;
+
   const data = DB.exportAll();
   const json = JSON.stringify(data, null, 2);
+  const filename = `cashpilot-backup-${today()}.json`;
+  const strategy = selectBackupExportStrategy({ view, nav, FileCtor });
+
+  if (strategy === 'android-saf') {
+    const saved = view.CashPilotAndroid.saveJsonBackup(filename, json);
+    if (saved) {
+      Toast.show(t('backup_export_success'), 'success');
+      return { strategy: 'android-saf', filename };
+    }
+  }
+
+  if (isNativeCapacitor(view) && typeof FileCtor === 'function' && typeof nav?.share === 'function') {
+    try {
+      const file = new FileCtor([json], filename, { type: 'application/json' });
+      if (!nav.canShare || nav.canShare({ files: [file] })) {
+        Promise.resolve(nav.share({ files: [file], title: filename })).catch(() => {});
+        Toast.show(t('backup_export_success'), 'success');
+        return { strategy: 'web-share', filename };
+      }
+    } catch {
+      // Fall through to anchor download
+    }
+  }
+
   const blob = new Blob([json], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
 
-  const a      = document.createElement('a');
+  const a      = doc.createElement('a');
   a.href       = url;
-  a.download   = `cashpilot-backup-${today()}.json`;
-  document.body.appendChild(a);
+  a.download   = filename;
+  doc.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  doc.body.removeChild(a);
   URL.revokeObjectURL(url);
 
   Toast.show(t('backup_export_success'), 'success');
+  return { strategy: 'anchor-download', filename };
 }
 
 const CURRENT_KEYS = Object.freeze(Object.values(DB.KEYS));
