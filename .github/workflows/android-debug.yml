@@ -1,0 +1,149 @@
+name: Android Debug APK
+
+on:
+  push:
+    branches:
+      - mobile/android-capacitor
+  pull_request:
+    branches:
+      - master
+      - mobile/android-capacitor
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-debug:
+    name: Build Android Debug APK (Ubuntu, Node 24, JDK 21, SDK 35)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Configure JDK 21 and Android SDK 35
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${JAVA_HOME_21_X64:-}" && -d "${JAVA_HOME_21_X64}" ]]; then
+            export JAVA_HOME="${JAVA_HOME_21_X64}"
+            export PATH="${JAVA_HOME}/bin:${PATH}"
+            echo "JAVA_HOME=${JAVA_HOME}" >> "$GITHUB_ENV"
+            echo "${JAVA_HOME}/bin" >> "$GITHUB_PATH"
+          fi
+          java -version
+          javac -version
+
+          if [[ -z "${ANDROID_HOME:-}" ]]; then
+            export ANDROID_HOME="/usr/local/lib/android/sdk"
+            echo "ANDROID_HOME=${ANDROID_HOME}" >> "$GITHUB_ENV"
+          fi
+          export ANDROID_SDK_ROOT="${ANDROID_HOME}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+
+          sdkmanager_bin="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "$sdkmanager_bin" ]]; then
+            sdkmanager_bin="$(find "${ANDROID_HOME}" -name sdkmanager -type f | head -n 1)"
+          fi
+          yes | "$sdkmanager_bin" --licenses >/dev/null || true
+          "$sdkmanager_bin" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Stage web runtime assets
+        run: npm run build:web
+
+      - name: Synchronize Capacitor Android platform
+        run: npx cap sync android
+
+      - name: Verify synced Android web assets allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          public_dir="android/app/src/main/assets/public"
+          test -f "$public_dir/index.html"
+          test -f "$public_dir/style.css"
+          test -f "$public_dir/manifest.json"
+          test -f "$public_dir/service-worker.js"
+          test -f "$public_dir/src/main.js"
+          test -f "$public_dir/vendor/chart.js-4.4.0/chart.umd.js"
+          test ! -e "$public_dir/README.md"
+          test ! -e "$public_dir/package.json"
+          test ! -e "$public_dir/tests"
+          test ! -e "$public_dir/docs"
+
+      - name: Run regression and security test suites
+        run: |
+          npm test
+          npm run test:security
+
+      - name: Build debug APK with Gradle wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+          log_dir="$RUNNER_TEMP/cashpilot-android-logs"
+          mkdir -p "$log_dir"
+          sed -i 's/\r$//' android/gradlew
+          chmod +x android/gradlew
+          (
+            cd android
+            ./gradlew assembleDebug --no-daemon --stacktrace
+          ) 2>&1 | tee "$log_dir/gradle-assembleDebug.log"
+
+      - name: Verify debug APK and merged manifest privacy invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          log_dir="$RUNNER_TEMP/cashpilot-android-logs"
+          mkdir -p "$log_dir"
+          apk_path="android/app/build/outputs/apk/debug/app-debug.apk"
+          if [[ ! -f "$apk_path" ]]; then
+            echo "Expected debug APK not found at $apk_path" >&2
+            exit 1
+          fi
+          apk_size="$(stat -c%s "$apk_path")"
+          if [[ "$apk_size" -le 0 ]]; then
+            echo "Debug APK is empty ($apk_size bytes)" >&2
+            exit 1
+          fi
+          sha256sum "$apk_path" | tee "$log_dir/apk-sha256.txt"
+          echo "apk_size_bytes=$apk_size" | tee -a "$log_dir/apk-sha256.txt"
+
+          merged_manifest="android/app/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml"
+          if [[ -f "$merged_manifest" ]]; then
+            cp "$merged_manifest" "$log_dir/MergedAndroidManifest.xml"
+            grep -q 'android:allowBackup="false"' "$merged_manifest"
+            grep -q 'android:fullBackupContent="@xml/backup_rules"' "$merged_manifest"
+            grep -q 'android:dataExtractionRules="@xml/data_extraction_rules"' "$merged_manifest"
+          fi
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cashpilot-android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Android build diagnostic logs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cashpilot-android-build-logs
+          path: ${{ runner.temp }}/cashpilot-android-logs/
+          if-no-files-found: warn
+          retention-days: 7
