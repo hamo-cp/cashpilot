@@ -6,6 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DEFAULT_ROOT_DIR = path.resolve(__dirname, '..');
 
+export const ANDROID_ENTRY_SOURCE = 'mobile/index.html';
+
 export const STAGE_ALLOWLIST_FILES = Object.freeze([
   'index.html',
   'manifest.json',
@@ -32,6 +34,7 @@ export const FORBIDDEN_STAGE_ENTRIES = Object.freeze([
   'android',
   'capacitor.config.json',
   'docs',
+  'mobile',
   'node_modules',
   'package-lock.json',
   'package.json',
@@ -112,8 +115,13 @@ export function buildWeb(options = {}) {
   }
 
   for (const relFile of STAGE_ALLOWLIST_FILES) {
-    const srcPath = path.join(rootDir, relFile);
+    const srcPath = relFile === 'index.html'
+      ? path.join(rootDir, ANDROID_ENTRY_SOURCE)
+      : path.join(rootDir, relFile);
     if (!fs.existsSync(srcPath) || !fs.statSync(srcPath).isFile()) {
+      if (relFile === 'index.html') {
+        throw new Error(`Missing required Android mobile entry: ${ANDROID_ENTRY_SOURCE}`);
+      }
       throw new Error(`Missing required runtime file: ${relFile}`);
     }
   }
@@ -139,7 +147,10 @@ export function buildWeb(options = {}) {
     if (fs.existsSync(destPath) && fs.lstatSync(destPath).isDirectory()) {
       removeExtraEntry(destPath);
     }
-    copyRuntimeFile(path.join(rootDir, relFile), destPath);
+    const srcPath = relFile === 'index.html'
+      ? path.join(rootDir, ANDROID_ENTRY_SOURCE)
+      : path.join(rootDir, relFile);
+    copyRuntimeFile(srcPath, destPath);
   }
 
   for (const relDir of STAGE_ALLOWLIST_DIRS) {

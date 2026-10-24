@@ -15,14 +15,14 @@ python -m http.server 3000
 ## المصدر التنفيذي
 
 - `index.html` و`style.css`: الواجهة الفعلية.
-- `src/main.js`: نقطة الدخول الوحيدة.
+- `src/main.js`: نقطة دخول واجهة PWA؛ يبدأ Android من `mobile/index.html` ويستخدم `src/mobile/app.js`.
 - `src/core/`, `src/pages/`, `src/services/`, `src/storage/`, `src/ui/`, `src/charts/`: وحدات التطبيق.
 - `vendor/chart.js-4.4.0/`: نسخة same-origin متحققة من مكتبة الرسوم مع ترخيصها وSHA-256.
 - `files/`: أيقونات PWA فقط؛ يجب أن يبقى الأرشيف المتقاعد `cashpilot.zip` غائبًا عن شجرة الإصدار.
 - `service-worker.js`: precache صريح للـimport graph الفعلي، ولا يخزن موارد cross-origin.
 - `tests/`: اختبارات regression الأمنية والسلوكية.
 
-لا توجد نسخة تنفيذية ثانية مدعومة. يجب نشر المصدر الفعّال بقائمة allowlist تستبعد الأرشيف المتقاعد، أو حذفه قبل النشر.
+يظل **index.html** مدخل واجهة PWA في المتصفح. يبدأ تطبيق Android من **mobile/index.html**، ويجهّز **scripts/build-web.mjs** هذا المدخل في **www/index.html** دون استبدال ملف PWA الأصلي. يشترك المدخلان في خدمات المال والتخزين مع واجهتين منفصلتين.
 
 ## الشبكة والخصوصية
 

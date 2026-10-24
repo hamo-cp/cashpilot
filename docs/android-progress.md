@@ -1,5 +1,9 @@
 # CashPilot Android Capacitor Packaging & Verification Guide
 
+## Mobile 2.0 P0 presentation boundary
+
+The browser PWA continues to start from the repository-root **index.html**. Android Mobile 2.0 starts from **mobile/index.html**, which the Android staging command places at **www/index.html**. Its independent presentation lives in **src/mobile/** and reads through the existing finance services. The root PWA entry, app ID, WebView origin, localStorage keys, and backup format remain unchanged. See **docs/mobile-v2-architecture.md** for the P0 screen map and release gates.
+
 ## 1. Architecture & Configuration Summary
 
 - **Application ID**: `com.cashpilot.app`
