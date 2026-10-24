@@ -8,6 +8,11 @@ const baseUrl = process.env.CASHPILOT_BASE_URL || 'http://127.0.0.1:3000';
 const mobileScreenshot = process.env.CASHPILOT_MOBILE_V2_SCREENSHOT || join(tmpdir(), 'cashpilot-mobile-v2.png');
 const comparisonScreenshot = process.env.CASHPILOT_MOBILE_V2_COMPARISON_SCREENSHOT
   || join(tmpdir(), 'cashpilot-mobile-v2-comparison.png');
+if (process.env.CASHPILOT_CDP_ISOLATED_PROFILE !== 'true') {
+  throw new Error(
+    'Refusing to seed localStorage without an explicitly disposable CDP browser profile.',
+  );
+}
 if (!port) throw new Error('CASHPILOT_CDP_PORT is required');
 
 const cdpEndpoint = 'http://127.0.0.1:' + port;
@@ -148,6 +153,7 @@ try {
   });
   await retry(() => evaluate('return document.readyState === "complete";'));
   savedStorage = await evaluate('return Object.fromEntries(Object.keys(localStorage).map(key => [key, localStorage.getItem(key)]));');
+  storageSeeded = true;
 
   const today = await evaluate('const d = new Date(); return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-");');
   await evaluate(
@@ -162,7 +168,6 @@ try {
       + 'localStorage.setItem("mz_settings", JSON.stringify({ theme: "dark", currency: "EGP" }));'
       + 'return true;',
   );
-  storageSeeded = true;
 
   await cdp.send('Network.setBypassServiceWorker', { bypass: true });
   const mobileRequestStart = requests.length;
@@ -276,6 +281,7 @@ try {
     mobileRequests: mobileRequests.length,
   }));
 } finally {
+  const cleanupErrors = [];
   if (storageSeeded && savedStorage) {
     try {
       const saved = JSON.stringify(savedStorage);
@@ -284,13 +290,22 @@ try {
           + 'for (const [key, value] of Object.entries(previous)) if (value !== null) localStorage.setItem(key, value);'
           + 'return true;',
       );
-    } catch {
-      // The target is test-owned and the browser profile is discarded by CI.
+    } catch (error) {
+      cleanupErrors.push(new Error('Unable to restore localStorage after the mobile CDP test.', { cause: error }));
     }
   }
   cdp.close();
   if (target.createdByTest) {
-    const response = await fetch(cdpEndpoint + '/json/close/' + encodeURIComponent(target.id));
-    if (!response.ok) throw new Error('Could not close the CDP target created by this test: ' + response.status);
+    try {
+      const response = await fetch(cdpEndpoint + '/json/close/' + encodeURIComponent(target.id));
+      if (!response.ok) {
+        throw new Error('Could not close the CDP target created by this test: ' + response.status);
+      }
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+  }
+  if (cleanupErrors.length > 0) {
+    throw new AggregateError(cleanupErrors, 'Mobile CDP test cleanup failed.');
   }
 }

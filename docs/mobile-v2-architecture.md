@@ -49,18 +49,35 @@ For a runnable side-by-side preview from the local static server, open **docs/mo
 | --- | --- | --- |
 | Source isolation | Build test proves the Android entry is staged and root PWA source remains unchanged | Passed in the Node regression suite. |
 | Data compatibility | Tests compare the mobile Home model to finance service results, assert no record writes, and pin the existing key and backup contract | Passed: summary parity, read-only behavior, XSS escaping and unchanged backup keys. |
-| Regression and security | Existing Node regression/security suites plus the new mobile tests pass | Passed with Node 24.22.1: 76 regression tests, core/UI checks, and 18 security tests. |
+| Regression and security | Existing Node regression/security suites plus the new mobile tests pass | Passed with Node 24.22.1: 77 regression tests, core/UI checks, and 18 security tests. |
 | Web staging | Android staging succeeds and contains only allowlisted assets | The allowlist staging test passed to an isolated temporary directory. The direct local build to **www/** did not return within 30 seconds and created no output; it was stopped, so default-path staging remains unverified. |
 | Debug APK | GitHub Actions debug workflow passes and uploads a non-empty APK with hash and logs | Workflow now checks the mobile entry/assets; no CI run or APK artifact yet. |
-| Browser behavior | Mobile navigation, search/filter, Back bridge, RTL/LTR and theme flow run in a real browser with screenshots | Added to the existing Chrome CDP CI job, but not run locally because no browser binary is installed. |
+| Browser behavior | Mobile navigation, search/filter, Back bridge, RTL/LTR and theme flow run in a real browser with screenshots | Added to the existing Chrome CDP CI job, which uses a dedicated temporary Chrome profile. Both CDP scripts now refuse to reset browser storage unless `CASHPILOT_CDP_ISOLATED_PROFILE=true`. Local visual verification remains pending: npm/npx are unavailable; Edge 155 is installed, but a prior headless launch stopped before page load when Edge could not write temporary DualEngine site-list files (error -5). |
 | Device behavior | Android 14/API 34 checks for RTL/LTR, themes, offline cold start, Back, safe areas, persistence and backup | Not verified in this environment. |
 | Mutation UX | Backup/restore, transaction edits, undo/confirmation, and data persistence tests | Not part of P0; no financial mutation UI is enabled. |
 | Release | Explicit owner approval and a reviewed release/signing plan | Not authorized by this task. |
 
 P0 is not complete based on a successful compilation alone. Report the exact command, exit status, source commit, CI run and artifact URL when those are available. Keep emulator and device checks explicitly separate from automated build evidence.
 
+## Android device test matrix
+
+Run this matrix against the same debug APK after CI produces it. API 34 is the required baseline; API 35 is recommended. These rows describe pending acceptance checks, not results already achieved.
+
+| Device profile | Checks | Expected result | Status |
+| --- | --- | --- | --- |
+| Android 14 emulator, API 34, 360 dp width | Home, Activity, empty states, 48 dp-equivalent targets, safe-area insets | No clipped controls or horizontal overflow; navigation remains usable | Pending APK and emulator |
+| Android 14 emulator, API 34, Arabic and English | Switch language, RTL/LTR mirroring, dates and amount direction | Arabic is RTL, English is LTR, and numeric amounts remain readable | Pending APK and emulator |
+| Android 14 emulator, API 34, light and dark themes | Toggle theme and relaunch | Existing theme preference is honored after relaunch; financial records stay unchanged | Pending APK and emulator |
+| Android 14 emulator, API 34, airplane mode | Cold launch, Home and Activity, month navigation | Packaged mobile assets and existing local records work without network access | Pending APK and emulator |
+| Android 14 emulator, API 34, existing-install upgrade | Install the debug APK over a build containing representative existing records | Application ID and WebView origin remain stable; records and settings remain available | Pending APK and upgrade fixture |
+| Android 15 emulator, API 35, large text and Back gesture | Increase font scale; traverse tabs and navigate Back | Content remains readable; Back returns to Home and exits only from Home | Recommended; pending APK and emulator |
+
+Do not seed records into a production build. Use disposable emulator fixtures, capture before/after storage snapshots, and keep export/import validation separate from this read-only P0 UI check.
+
 ## Current environment notes
 
 The requested **D:\Cashpilot-android** directory was absent. Work uses a new checkout at **D:\Cashpilot-mobile\cashpilot-android**, on local branch **feature/mobile-v2**, created from **mobile/android-capacitor** at **eae629bca63c830b03ce2996f4cb0381a1edc2c6**. The pre-existing **D:\Cashpilot-mobile\cashpilot-master** folder is a non-Git PWA snapshot and was not edited.
 
-Node.js 24.22.1 is available from the bundled runtime. npm, npx, project node_modules, Android SDK tools, and Playwright's bundled Chromium executable are unavailable. Microsoft Edge 155 is installed, but a headless launch through the existing Playwright package exited before opening the page: Edge could not write temporary DualEngine site-list files in its sandbox profile (error -5). No browser screenshot or runtime claim is made from that attempt. The comparison page is available at **docs/mobile-v2-comparison.html** when served from the repository root.
+Node.js 24.22.1 is available from the bundled runtime; npm, npx, project **node_modules**, Android SDK tools, **adb**, and Playwright's bundled Chromium executable are unavailable. Microsoft Edge 155 is installed, but a headless launch through the existing Playwright package exited before opening the page because Edge could not write temporary DualEngine site-list files in its sandbox profile (error -5). No browser screenshot or runtime claim is made from that attempt. The comparison page is available at **docs/mobile-v2-comparison.html** when served from the repository root.
+
+The default **node scripts/build-web.mjs** command was also traced locally: it reached **fs.mkdirSync(...\www)** and did not return; it was interrupted without creating **www/**. Node's read-only write-access check and the repository ACL both report write permission. The exact filesystem or sandbox mechanism behind the stall is unknown; do not interpret this as successful default-path staging. The isolated temporary-output staging tests remain separate evidence.

@@ -32,7 +32,7 @@ const EXPECTED_FINANCIAL_KEYS = [
 function installMemoryStorage(seed = {}) {
   const priorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
   const values = new Map(Object.entries(seed).map(([key, value]) => [key, JSON.stringify(value)]));
-  const writes = [];
+  const mutations = [];
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     writable: true,
@@ -41,17 +41,22 @@ function installMemoryStorage(seed = {}) {
         return values.has(key) ? values.get(key) : null;
       },
       setItem(key, value) {
-        writes.push({ key, value: String(value) });
-        values.set(key, String(value));
+        const rawValue = String(value);
+        mutations.push({ type: 'set', key, value: rawValue });
+        values.set(key, rawValue);
       },
       removeItem(key) {
+        mutations.push({ type: 'remove', key });
         values.delete(key);
       },
     },
   });
 
   return {
-    writes,
+    mutations,
+    snapshot() {
+      return Object.fromEntries(values);
+    },
     restore() {
       if (priorDescriptor) Object.defineProperty(globalThis, 'localStorage', priorDescriptor);
       else delete globalThis.localStorage;
@@ -76,6 +81,7 @@ test('mobile Home reuses finance summary and transaction results without writing
   });
   t.after(storage.restore);
 
+  const storedValuesBefore = storage.snapshot();
   const home = getHomeViewModel(Finance, { month: 10, year: 2026 });
   const expectedSummary = Finance.getMonthSummary(10, 2026);
 
@@ -87,7 +93,8 @@ test('mobile Home reuses finance summary and transaction results without writing
   assert.equal(home.summary.budgetRate, 70);
   assert.deepEqual(home.recent, Finance.searchTransactions('', 10, 2026).slice(0, 4));
   assert.equal(home.recent.length, 2);
-  assert.deepEqual(storage.writes, []);
+  assert.deepEqual(storage.mutations, []);
+  assert.deepEqual(storage.snapshot(), storedValuesBefore);
 });
 
 test('mobile Activity delegates text search to finance and filters the existing result by type', t => {
@@ -102,6 +109,7 @@ test('mobile Activity delegates text search to finance and filters the existing 
   });
   t.after(storage.restore);
 
+  const storedValuesBefore = storage.snapshot();
   const activity = getActivityViewModel(Finance, {
     period: { month: 10, year: 2026 },
     query: 'coffee',
@@ -110,7 +118,8 @@ test('mobile Activity delegates text search to finance and filters the existing 
   assert.equal(activity.transactions.length, 1);
   assert.equal(activity.transactions[0].id, 'exp-1');
   assert.equal(activity.transactions[0].type, 'expense');
-  assert.deepEqual(storage.writes, []);
+  assert.deepEqual(storage.mutations, []);
+  assert.deepEqual(storage.snapshot(), storedValuesBefore);
 });
 
 test('mobile period and date formatters handle month boundaries and local date-only values', () => {
@@ -189,4 +198,23 @@ test('Mobile 2.0 has its own entry and retains the existing storage and backup k
   assert.match(comparison, /src="\.\.\/mobile\/index\.html"/);
   assert.deepEqual(Object.values(DB.KEYS).sort(), [...EXPECTED_FINANCIAL_KEYS].sort());
   assert.deepEqual(Object.keys(DB.exportAll()).sort(), [...EXPECTED_FINANCIAL_KEYS].sort());
+});
+
+test('CDP browser tests require an isolated profile before mutating browser storage', () => {
+  const desktopBrowserTest = fs.readFileSync(path.join(repoRoot, 'tests', 'browser-cdp.test.mjs'), 'utf8');
+  const mobileBrowserTest = fs.readFileSync(path.join(repoRoot, 'tests', 'mobile-browser-cdp.test.mjs'), 'utf8');
+  const ciWorkflow = fs.readFileSync(path.join(repoRoot, '.github', 'workflows', 'ci.yml'), 'utf8');
+  const profileGuard = /CASHPILOT_CDP_ISOLATED_PROFILE !== 'true'/;
+
+  assert.match(desktopBrowserTest, profileGuard);
+  assert.match(mobileBrowserTest, profileGuard);
+  assert.match(ciWorkflow, /CASHPILOT_CDP_ISOLATED_PROFILE:\s*'true'/);
+  assert.match(mobileBrowserTest, /Unable to restore localStorage after the mobile CDP test/);
+  assert.ok(
+    mobileBrowserTest.indexOf('savedStorage = await evaluate(')
+      < mobileBrowserTest.indexOf('storageSeeded = true;')
+      && mobileBrowserTest.indexOf('storageSeeded = true;')
+        < mobileBrowserTest.indexOf('localStorage.clear();'),
+    'storage restoration must be armed before the fixture clears localStorage',
+  );
 });

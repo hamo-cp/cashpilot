@@ -96,6 +96,10 @@ test('Capacitor configuration, pinned dependencies, and Android SDK policy invar
   assert.equal(capConfig.appName, 'CashPilot');
   assert.equal(capConfig.webDir, 'www');
   assert.equal(capConfig.server?.androidScheme, 'https');
+  assert.ok(
+    capConfig.server?.hostname === undefined || capConfig.server.hostname === 'localhost',
+    'The existing WebView hostname must remain localhost until a reviewed migration exists',
+  );
   assert.equal(capConfig.server?.url, undefined, 'Production/debug config must not point to external live-reload server');
   assert.equal(capConfig.server?.cleartext, undefined, 'HTTPS scheme must not enable cleartext traffic');
 
