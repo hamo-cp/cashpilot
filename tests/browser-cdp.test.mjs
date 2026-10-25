@@ -7,6 +7,11 @@ const port = process.env.CASHPILOT_CDP_PORT;
 const baseUrl = process.env.CASHPILOT_BASE_URL || 'http://127.0.0.1:3000';
 const desktopScreenshot = process.env.CASHPILOT_DESKTOP_SCREENSHOT || join(tmpdir(), 'cashpilot-desktop.png');
 const mobileScreenshot = process.env.CASHPILOT_MOBILE_SCREENSHOT || join(tmpdir(), 'cashpilot-mobile.png');
+if (process.env.CASHPILOT_CDP_ISOLATED_PROFILE !== 'true') {
+  throw new Error(
+    'Refusing to run browser tests that reset localStorage/sessionStorage without a disposable CDP profile.',
+  );
+}
 if (!port) throw new Error('CASHPILOT_CDP_PORT is required');
 const cdpEndpoint = `http://127.0.0.1:${port}`;
 

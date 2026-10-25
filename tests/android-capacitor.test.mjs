@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  ANDROID_ENTRY_SOURCE,
   STAGE_ALLOWLIST,
   FORBIDDEN_STAGE_ENTRIES,
   buildWeb,
@@ -49,13 +50,18 @@ test('buildWeb stages only allowlisted runtime assets, removes stale files, and 
     assert.equal(fs.existsSync(path.join(tempOut, 'src', 'stale-module.js')), false);
 
     const stagedIndexBytes1 = fs.readFileSync(path.join(tempOut, 'index.html'));
-    const sourceIndexBytes = fs.readFileSync(path.join(repoRoot, 'index.html'));
-    assert.equal(stagedIndexBytes1.equals(sourceIndexBytes), true);
+    const mobileIndexBytes = fs.readFileSync(path.join(repoRoot, ANDROID_ENTRY_SOURCE));
+    const pwaIndexBytes = fs.readFileSync(path.join(repoRoot, 'index.html'));
+    assert.equal(stagedIndexBytes1.equals(mobileIndexBytes), true);
+    assert.equal(stagedIndexBytes1.equals(pwaIndexBytes), false);
+    assert.match(stagedIndexBytes1.toString('utf8'), /\/src\/mobile\/app\.js/);
+    assert.doesNotMatch(stagedIndexBytes1.toString('utf8'), /\/src\/main\.js/);
 
     const secondRun = buildWeb({ rootDir: repoRoot, outDir: tempOut, allowExternalOutDir: true });
     assert.deepEqual(secondRun.stagedEntries, STAGE_ALLOWLIST);
     const stagedIndexBytes2 = fs.readFileSync(path.join(tempOut, 'index.html'));
     assert.equal(stagedIndexBytes2.equals(stagedIndexBytes1), true);
+    assert.equal(fs.readFileSync(path.join(repoRoot, 'index.html')).equals(pwaIndexBytes), true);
   } finally {
     fs.rmSync(tempOut, { recursive: true, force: true });
   }
@@ -71,6 +77,8 @@ test('buildWeb rejects staging outside repo root by default and fails when requi
   const incompleteRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cashpilot-incomplete-root-'));
   try {
     fs.writeFileSync(path.join(incompleteRoot, 'index.html'), '<!doctype html>', 'utf8');
+    fs.mkdirSync(path.join(incompleteRoot, 'mobile'), { recursive: true });
+    fs.writeFileSync(path.join(incompleteRoot, 'mobile', 'index.html'), '<!doctype html>', 'utf8');
     assert.throws(
       () => buildWeb({ rootDir: incompleteRoot, outDir: path.join(incompleteRoot, 'www') }),
       /Missing required runtime file: manifest.json/,
@@ -88,6 +96,10 @@ test('Capacitor configuration, pinned dependencies, and Android SDK policy invar
   assert.equal(capConfig.appName, 'CashPilot');
   assert.equal(capConfig.webDir, 'www');
   assert.equal(capConfig.server?.androidScheme, 'https');
+  assert.ok(
+    capConfig.server?.hostname === undefined || capConfig.server.hostname === 'localhost',
+    'The existing WebView hostname must remain localhost until a reviewed migration exists',
+  );
   assert.equal(capConfig.server?.url, undefined, 'Production/debug config must not point to external live-reload server');
   assert.equal(capConfig.server?.cleartext, undefined, 'HTTPS scheme must not enable cleartext traffic');
 

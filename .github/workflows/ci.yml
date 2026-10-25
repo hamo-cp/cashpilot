@@ -54,8 +54,11 @@ jobs:
         env:
           CASHPILOT_BASE_URL: http://127.0.0.1:3000
           CASHPILOT_CDP_PORT: '9222'
+          CASHPILOT_CDP_ISOLATED_PROFILE: 'true'
           CASHPILOT_DESKTOP_SCREENSHOT: ${{ runner.temp }}/cashpilot-browser/desktop.png
           CASHPILOT_MOBILE_SCREENSHOT: ${{ runner.temp }}/cashpilot-browser/mobile.png
+          CASHPILOT_MOBILE_V2_SCREENSHOT: ${{ runner.temp }}/cashpilot-browser/mobile-v2.png
+          CASHPILOT_MOBILE_V2_COMPARISON_SCREENSHOT: ${{ runner.temp }}/cashpilot-browser/mobile-v2-comparison.png
         run: |
           set -euo pipefail
           evidence_dir="$RUNNER_TEMP/cashpilot-browser"
